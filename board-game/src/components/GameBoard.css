@@ -152,14 +152,49 @@
   box-shadow: inset 0 0 0 2px #ffd700;
 }
 
-.board-cell.valid-move {
-  background-color: #81c784 !important;
+/* Different colors for different move types */
+.board-cell.valid-move-move {
+  background-color: #81c784 !important; /* Green for movement */
 }
 
-.board-cell.valid-move:hover {
+.board-cell.valid-move-attack {
+  background-color: #ef5350 !important; /* Red for attack */
+}
+
+.board-cell.valid-move-create {
+  background-color: #64b5f6 !important; /* Blue for creation */
+}
+
+.board-cell.valid-move-upgrade {
+  background-color: #81c784 !important; /* Green for upgrade */
+}
+
+.board-cell.valid-move-combine {
+  background-color: #81c784 !important; /* Green for combine */
+}
+
+/* Hover effects for move types */
+.board-cell.valid-move-move:hover {
   background-color: #66bb6a !important;
 }
 
+.board-cell.valid-move-attack:hover {
+  background-color: #e53935 !important;
+}
+
+.board-cell.valid-move-create:hover {
+  background-color: #42a5f5 !important;
+}
+
+.board-cell.valid-move-upgrade:hover {
+  background-color: #66bb6a !important;
+}
+
+.board-cell.valid-move-combine:hover {
+  background-color: #66bb6a !important;
+}
+
+/* Move indicators */
 .board-cell.valid-move::before {
   content: '';
   position: absolute;

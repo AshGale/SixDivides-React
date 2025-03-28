@@ -103,25 +103,27 @@ const GameBoard = () => {
 
     if (attacker.value > defender.value) {
       // Attacker wins
-      const newValue = Math.max(1, attacker.value - defender.value); // Ensure minimum value of 1
+      const newValue = Math.max(1, attacker.value - defender.value);
       newBoard[defenderRow][defenderCol] = { playerId: attacker.playerId, value: newValue };
       newBoard[attackerRow][attackerCol] = null;
     } else {
       // Defender wins or ties
-      const newDefenderValue = Math.max(1, defender.value - attacker.value); // Ensure minimum value of 1
-      if (newDefenderValue === defender.value) {
-        // If no change in value (e.g., equal values), remove attacker
-        newBoard[defenderRow][defenderCol] = defender;
+      if (attacker.value === defender.value) {
+        // Equal values - both are removed
+        newBoard[defenderRow][defenderCol] = null;
       } else {
+        // Defender survives with reduced value
         newBoard[defenderRow][defenderCol] = {
           ...defender,
-          value: newDefenderValue
+          value: Math.max(1, defender.value - attacker.value)
         };
       }
       newBoard[attackerRow][attackerCol] = null;
     }
 
     setBoard(newBoard);
+    setValidMoves([]); // Clear valid moves after combat
+    setSelectedPiece(null); // Clear selected piece after combat
     setActions(prev => {
       const newActions = prev - 1;
       if (newActions <= 0) endTurn();
@@ -167,6 +169,8 @@ const GameBoard = () => {
     }
 
     setBoard(newBoard);
+    setSelectedPiece(null); // Clear selected piece after combine
+    setValidMoves([]); // Clear valid moves after combine
     setActions(prev => {
       const newActions = prev - 1;
       if (newActions <= 0) endTurn();
@@ -258,28 +262,50 @@ const GameBoard = () => {
     if (!piece || piece.playerId !== currentPlayer) return [];
 
     const adjacentTiles = getAdjacentTiles(row, col);
+    const validMoves = [];
     
     if (piece.value === 6) { // Base
-      // For bases, show adjacent tiles that are either:
-      // - empty (for creation)
-      // - friendly units below value 6 (for upgrade)
-      // - enemy units (for reduction)
-      return adjacentTiles.filter(([r, c]) => {
+      // For bases, check each adjacent tile
+      adjacentTiles.forEach(([r, c]) => {
         const targetCell = board[r][c];
-        return !targetCell || 
-               (targetCell.playerId === currentPlayer && targetCell.value < 6) ||
-               (targetCell.playerId !== currentPlayer); // Any enemy unit can be attacked
+        if (!targetCell) {
+          validMoves.push({ row: r, col: c, type: 'create' }); // Empty cell - can create
+        } else if (targetCell.playerId === currentPlayer && targetCell.value < 6) {
+          validMoves.push({ row: r, col: c, type: 'upgrade' }); // Friendly unit - can upgrade
+        } else if (targetCell.playerId !== currentPlayer) {
+          validMoves.push({ row: r, col: c, type: 'attack' }); // Enemy unit - can attack
+        }
       });
     } else if (unitTypes[piece.value].canMove) {
-      // For movable units, check movement and combat rules
-      return adjacentTiles.filter(([r, c]) => {
+      // For movable units
+      adjacentTiles.forEach(([r, c]) => {
         const targetCell = board[r][c];
-        if (!targetCell) return true; // Can move to empty cell
-        if (targetCell.playerId === currentPlayer) return true; // Can combine with friendly
-        return unitTypes[piece.value].canAttack; // Can attack if unit type allows
+        if (!targetCell) {
+          validMoves.push({ row: r, col: c, type: 'move' }); // Empty cell - can move
+        } else if (targetCell.playerId === currentPlayer) {
+          if (targetCell.value !== 6 && piece.value + targetCell.value <= 6) {
+            validMoves.push({ row: r, col: c, type: 'combine' }); // Friendly unit - can combine
+          }
+        } else if (unitTypes[piece.value].canAttack) {
+          validMoves.push({ row: r, col: c, type: 'attack' }); // Enemy unit - can attack if unit type allows
+        }
       });
     }
-    return [];
+    
+    return validMoves;
+  };
+
+  const isCellValid = (row, col) => {
+    return validMoves.find(move => move.row === row && move.col === col);
+  };
+
+  const getCellClasses = (row, col) => {
+    const validMove = isCellValid(row, col);
+    if (!validMove) return '';
+    
+    const classes = ['valid-move'];
+    classes.push(`valid-move-${validMove.type}`);
+    return classes.join(' ');
   };
 
   const handleCellClick = (row, col) => {
@@ -288,7 +314,7 @@ const GameBoard = () => {
     const piece = board[row][col];
     
     // If clicking a valid move location
-    if (selectedPiece && validMoves.some(([r, c]) => r === row && c === col)) {
+    if (selectedPiece && validMoves.some(move => move.row === row && move.col === col)) {
       const selectedUnit = board[selectedPiece.row][selectedPiece.col];
       
       // Safety check - selected unit must exist
@@ -345,10 +371,6 @@ const GameBoard = () => {
     }
   };
 
-  const isCellValid = (row, col) => {
-    return validMoves.some(([r, c]) => r === row && c === col);
-  };
-
   return (
     <div className="game-container">
       <div className="game-info">
@@ -380,7 +402,7 @@ const GameBoard = () => {
                   selectedPiece?.row === rowIndex && selectedPiece?.col === colIndex
                     ? 'selected'
                     : ''
-                } ${isCellValid(rowIndex, colIndex) ? 'valid-move' : ''}`}
+                } ${getCellClasses(rowIndex, colIndex)}`}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
               >
                 {cell && (
