@@ -134,6 +134,21 @@ const GameBoard = () => {
   const handleCombine = (fromRow, fromCol, toRow, toCol) => {
     const piece1 = board[fromRow][fromCol];
     const piece2 = board[toRow][toCol];
+    
+    // Safety check - both pieces must exist
+    if (!piece1 || !piece2) {
+      setSelectedPiece(null);
+      setValidMoves([]);
+      return;
+    }
+
+    // Prevent combining with a base
+    if (piece2.value === 6) {
+      setSelectedPiece(null);
+      setValidMoves([]);
+      return;
+    }
+
     const combinedValue = piece1.value + piece2.value;
     const newBoard = [...board];
 
@@ -144,6 +159,11 @@ const GameBoard = () => {
       // Convert target to base, keep remainder on original
       newBoard[toRow][toCol] = { playerId: piece1.playerId, value: 6 };
       newBoard[fromRow][fromCol] = { playerId: piece1.playerId, value: combinedValue - 6 };
+    } else {
+      // Invalid combination
+      setSelectedPiece(null);
+      setValidMoves([]);
+      return;
     }
 
     setBoard(newBoard);
@@ -172,18 +192,20 @@ const GameBoard = () => {
         value: targetCell.value + 1
       };
     } else if (targetCell.playerId !== currentPlayer) {
-      // Reduce enemy unit value by 1, remove if reaching 1
-      const newValue = targetCell.value - 1;
-      if (newValue <= 1) {
-        newBoard[row][col] = null; // Remove unit when reduced to 1
+      // Only reduce enemy unit value by 1, remove only if it would go to 0
+      if (targetCell.value === 1) {
+        newBoard[row][col] = null; // Remove unit that would be reduced to 0
       } else {
         newBoard[row][col] = {
           ...targetCell,
-          value: newValue
+          value: targetCell.value - 1
         };
       }
     } else {
-      return; // Invalid action
+      // Invalid action - don't consume an action
+      setSelectedPiece(null);
+      setValidMoves([]);
+      return;
     }
 
     setBoard(newBoard);
@@ -267,12 +289,20 @@ const GameBoard = () => {
     
     // If clicking a valid move location
     if (selectedPiece && validMoves.some(([r, c]) => r === row && c === col)) {
+      const selectedUnit = board[selectedPiece.row][selectedPiece.col];
+      
+      // Safety check - selected unit must exist
+      if (!selectedUnit) {
+        setSelectedPiece(null);
+        setValidMoves([]);
+        return;
+      }
+
       if (selectedPiece.isBase) {
         handleBaseAction(row, col);
         return;
       }
 
-      const selectedUnit = board[selectedPiece.row][selectedPiece.col];
       const targetPiece = board[row][col];
 
       if (!targetPiece) {
@@ -286,6 +316,8 @@ const GameBoard = () => {
           if (newActions <= 0) endTurn();
           return newActions;
         });
+        setSelectedPiece(null);
+        setValidMoves([]);
         checkWinCondition(newBoard);
       } else if (targetPiece.playerId === currentPlayer) {
         // Combine friendly units
@@ -293,9 +325,12 @@ const GameBoard = () => {
       } else if (unitTypes[selectedUnit.value].canAttack) {
         // Combat with enemy unit
         handleCombat(selectedPiece.row, selectedPiece.col, row, col);
+      } else {
+        // Invalid attack attempt - don't consume an action
+        setSelectedPiece(null);
+        setValidMoves([]);
+        return;
       }
-      setSelectedPiece(null);
-      setValidMoves([]);
       return;
     }
 
