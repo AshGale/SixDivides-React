@@ -1,0 +1,113 @@
+.game-board {
+  background-color: #f0f0f0;
+  border: 2px solid #333;
+  display: inline-block;
+  padding: 4px;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.board-row {
+  display: flex;
+}
+
+.board-cell {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.board-row:nth-child(odd) .board-cell:nth-child(even),
+.board-row:nth-child(even) .board-cell:nth-child(odd) {
+  background-color: #e0e0e0;
+}
+
+.board-cell:hover {
+  background-color: #f8f8f8;
+}
+
+.board-cell.selected {
+  background-color: #ffeb3b !important;
+  box-shadow: inset 0 0 0 2px #ffd700;
+}
+
+/* Different colors for different move types */
+.board-cell.valid-move-move {
+  background-color: #81c784 !important; /* Green for movement */
+}
+
+.board-cell.valid-move-attack {
+  background-color: #ef5350 !important; /* Red for attack */
+}
+
+.board-cell.valid-move-create {
+  background-color: #64b5f6 !important; /* Blue for creation */
+}
+
+.board-cell.valid-move-upgrade {
+  background-color: #81c784 !important; /* Green for upgrade */
+}
+
+.board-cell.valid-move-combine {
+  background-color: #81c784 !important; /* Green for combine */
+}
+
+/* Hover effects for move types */
+.board-cell.valid-move-move:hover {
+  background-color: #66bb6a !important;
+}
+
+.board-cell.valid-move-attack:hover {
+  background-color: #e53935 !important;
+}
+
+.board-cell.valid-move-create:hover {
+  background-color: #42a5f5 !important;
+}
+
+.board-cell.valid-move-upgrade:hover {
+  background-color: #66bb6a !important;
+}
+
+.board-cell.valid-move-combine:hover {
+  background-color: #66bb6a !important;
+}
+
+/* Move indicators */
+.board-cell.valid-move::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.dice {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+  z-index: 1;
+}
+
+.dice:hover {
+  transform: scale(1.1);
+}
