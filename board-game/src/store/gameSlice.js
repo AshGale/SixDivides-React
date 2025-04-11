@@ -53,6 +53,35 @@ const checkWinCondition = (board) => {
   return null;
 };
 
+/**
+ * Find the next player with units on the board
+ */
+const findNextPlayerWithUnits = (board, currentPlayer, numPlayers) => {
+  let nextPlayer = (currentPlayer + 1) % numPlayers;
+  let playersChecked = 0;
+  
+  while (playersChecked < numPlayers) {
+    const playerHasUnits = board.flat().some(cell => 
+      cell && cell.playerId === nextPlayer
+    );
+    
+    if (playerHasUnits) {
+      const startingActions = getStartingActions(board, nextPlayer);
+      // If the next player has no actions, skip them too
+      if (startingActions > 0) {
+        return nextPlayer;
+      }
+    }
+    
+    nextPlayer = (nextPlayer + 1) % numPlayers;
+    playersChecked++;
+  }
+  
+  // If we've checked all players and none have actions, return the original next player
+  // This is a fallback to prevent infinite loops
+  return (currentPlayer + 1) % numPlayers;
+};
+
 const initialState = {
   currentPlayer: 0,
   board: createEmptyBoard(),
@@ -80,6 +109,14 @@ export const gameSlice = createSlice({
       state.gameState = GAME_STATES.IN_PROGRESS;
       state.actions = getStartingActions(state.board, 0);
       state.turnHistory = [];
+      
+      // If the first player has no actions, move to the next player
+      if (state.actions === 0) {
+        const nextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, numPlayers);
+        state.currentPlayer = nextPlayer;
+        state.actions = getStartingActions(state.board, nextPlayer);
+        state.showTurnMessage = true;
+      }
     },
     
     selectPiece: (state, action) => {
@@ -295,27 +332,20 @@ export const gameSlice = createSlice({
     },
     
     endTurn: (state) => {
-      // Move to next player
-      let nextPlayer = (state.currentPlayer + 1) % state.numPlayers;
-      
-      // Skip players that have been eliminated
-      let playersChecked = 0;
-      while (playersChecked < state.numPlayers) {
-        const playerHasUnits = state.board.flat().some(cell => 
-          cell && cell.playerId === nextPlayer
-        );
-        
-        if (playerHasUnits) break;
-        
-        nextPlayer = (nextPlayer + 1) % state.numPlayers;
-        playersChecked++;
-      }
+      // Move to next player with units and actions
+      const nextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, state.numPlayers);
       
       state.currentPlayer = nextPlayer;
       state.actions = getStartingActions(state.board, nextPlayer);
       state.selectedPiece = null;
       state.validMoves = [];
       state.showTurnMessage = true;
+      
+      // If the next player has no actions, end their turn immediately
+      if (state.actions === 0) {
+        // We'll handle this in the component with useEffect
+        // to avoid an infinite loop in the reducer
+      }
       
       // Add to turn history
       state.turnHistory.push({

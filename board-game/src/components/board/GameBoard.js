@@ -13,7 +13,6 @@ import {
   setShowTurnMessage
 } from '../../store/gameSlice';
 import { getValidMovesForPiece, getCellClasses } from '../../utils/gameUtils';
-import { PLAYERS, UNIT_TYPES } from '../../constants/gameConstants';
 import './GameBoard.css';
 
 /**
@@ -41,6 +40,17 @@ const GameBoard = () => {
       return () => clearTimeout(timer);
     }
   }, [showTurnMessage, dispatch]);
+
+  // Automatically end turn when actions are depleted
+  useEffect(() => {
+    if (actions === 0 && !winner) {
+      // Add a small delay before ending the turn
+      const timer = setTimeout(() => {
+        dispatch(endTurn());
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [actions, winner, dispatch]);
 
   // Handle cell click
   const handleCellClick = (row, col) => {
@@ -109,13 +119,7 @@ const GameBoard = () => {
         dispatch(clearSelection());
         return;
       }
-
-      // Check if actions are depleted
-      if (actions <= 1) {
-        setTimeout(() => {
-          dispatch(endTurn());
-        }, 500);
-      }
+      
       return;
     }
 

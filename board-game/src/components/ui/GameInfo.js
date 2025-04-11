@@ -1,7 +1,8 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { PLAYERS } from '../../constants/gameConstants';
-import { initializeGame, endTurn } from '../../store/gameSlice';
+import { initializeGame } from '../../store/gameSlice';
 import './GameInfo.css';
 
 /**
@@ -9,13 +10,16 @@ import './GameInfo.css';
  */
 const GameInfo = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { currentPlayer, actions, showTurnMessage, winner } = useSelector(state => state.game);
 
-  const handleEndTurn = () => {
-    dispatch(endTurn());
+  const handleNewGame = () => {
+    // Navigate to the new game setup screen instead of starting a new game directly
+    navigate('/new-game');
   };
 
-  const handleNewGame = () => {
+  const handleQuickRestart = () => {
+    // For the win screen, we'll keep the option to directly restart with the same settings
     dispatch(initializeGame());
   };
 
@@ -31,13 +35,6 @@ const GameInfo = () => {
       </div>
       
       <div className="game-controls">
-        <button 
-          className="control-button end-turn-button" 
-          onClick={handleEndTurn}
-          disabled={winner !== null}
-        >
-          End Turn
-        </button>
         <button 
           className="control-button new-game-button" 
           onClick={handleNewGame}
@@ -63,12 +60,20 @@ const GameInfo = () => {
           >
             {winner.name} Wins!
           </div>
-          <button 
-            className="new-game-button" 
-            onClick={handleNewGame}
-          >
-            Start New Game
-          </button>
+          <div className="win-actions">
+            <button 
+              className="quick-restart-button" 
+              onClick={handleQuickRestart}
+            >
+              Quick Restart
+            </button>
+            <button 
+              className="new-game-button" 
+              onClick={handleNewGame}
+            >
+              New Game Setup
+            </button>
+          </div>
         </div>
       )}
     </div>
