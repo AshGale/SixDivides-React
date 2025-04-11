@@ -30,6 +30,7 @@ const GameBoard = () => {
     showTurnMessage,
     winner
   } = useSelector(state => state.game);
+  const { aiPlayers } = useSelector(state => state.ai);
 
   // Show turn message when player changes
   useEffect(() => {
@@ -43,6 +44,11 @@ const GameBoard = () => {
 
   // Handle cell click
   const handleCellClick = (row, col) => {
+    // If it's an AI player's turn, don't allow human interaction
+    if (aiPlayers[currentPlayer] !== null) {
+      return;
+    }
+    
     if (winner || actions <= 0) return;
 
     const piece = board[row][col];

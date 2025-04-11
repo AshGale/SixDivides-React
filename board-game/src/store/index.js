@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import gameReducer from './gameSlice';
+import aiReducer from './aiSlice';
 
 export const store = configureStore({
   reducer: {
     game: gameReducer,
-    // Add more reducers here as your application grows
+    ai: aiReducer,
   },
 });
 
