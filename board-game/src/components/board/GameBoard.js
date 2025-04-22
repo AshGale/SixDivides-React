@@ -12,7 +12,7 @@ import {
   endTurn,
   setShowTurnMessage
 } from '../../store/gameSlice';
-import { getValidMovesForPiece, getCellClasses } from '../../utils/gameUtils';
+import { getValidMovesForPiece, getCellClasses } from '../../logic';
 import './GameBoard.css';
 
 /**

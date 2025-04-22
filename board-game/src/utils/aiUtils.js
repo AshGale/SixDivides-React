@@ -1,4 +1,4 @@
-import { getValidMovesForPiece } from './gameUtils';
+import { getValidMovesForPiece } from '../logic';
 import { UNIT_TYPES } from '../constants/gameConstants';
 
 /**
