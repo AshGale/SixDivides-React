@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import GameBoard from '../components/board/GameBoard';
 import GameInfo from '../components/ui/GameInfo';
+import GameControls from '../components/ui/GameControls';
 import { initializeGame } from '../store/gameSlice';
 import useAiTurn from '../hooks/useAiTurn';
 import './GamePage.css';
@@ -41,6 +42,7 @@ const GamePage = () => {
         <GameBoard />
         
         <div className="game-actions">
+          <GameControls />
           <button className="menu-button" onClick={handleBackToMenu}>
             Back to Menu
           </button>

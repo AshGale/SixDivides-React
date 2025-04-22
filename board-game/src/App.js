@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import NewGamePage from './pages/NewGamePage';
 import GamePage from './pages/GamePage';
 import HowToPlayPage from './pages/HowToPlayPage';
+import Notification from './components/ui/Notification';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           }}>
             CODE UPDATE ACTIVE - {new Date().toLocaleTimeString()}
           </div>
+          <Notification />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/new-game" element={<NewGamePage />} />
