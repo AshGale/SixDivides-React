@@ -1,0 +1,82 @@
+.ai-settings {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+}
+
+.ai-settings h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.player-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.player-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-label {
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.player-setting select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.player-setting select:hover {
+  border-color: #aaa;
+}
+
+.player-setting select:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.ai-delay-setting {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.ai-delay-setting label {
+  font-weight: bold;
+  color: #555;
+  min-width: 150px;
+}
+
+.ai-delay-setting input[type="range"] {
+  flex: 1;
+  cursor: pointer;
+}
+
+.ai-delay-setting span {
+  min-width: 60px;
+  text-align: right;
+  color: #666;
+  font-size: 0.9rem;
+}
