@@ -146,7 +146,7 @@ const GameBoard = () => {
               row={rowIndex}
               col={colIndex}
               cell={cell}
-              className={getCellClasses(rowIndex, colIndex, validMoves, selectedPiece)}
+              className={getCellClasses(rowIndex, colIndex, validMoves, selectedPiece, board, currentPlayer)}
               onClick={handleCellClick}
             />
           ))}

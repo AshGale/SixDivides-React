@@ -74,12 +74,19 @@ export const getValidMovesForPiece = (board, row, col, currentPlayer) => {
       adjacentTiles.forEach(([adjRow, adjCol]) => {
         const targetCell = board[adjRow][adjCol];
         
+        // Skip entirely if the target is a friendly base
+        if (targetCell && targetCell.value === 6 && targetCell.playerId === currentPlayer) {
+          return;
+        }
+        
         if (!targetCell) {
           // Can move to empty cell
           validMoves.push({ row: adjRow, col: adjCol, type: 'move' });
         } else if (targetCell.playerId === currentPlayer) {
-          // Can combine with friendly unit
-          validMoves.push({ row: adjRow, col: adjCol, type: 'combine' });
+          // Can combine with friendly unit (but not with bases)
+          if (targetCell.value !== 6) {
+            validMoves.push({ row: adjRow, col: adjCol, type: 'combine' });
+          }
         } else if (unitInfo.canAttack) {
           // Can attack enemy unit
           validMoves.push({ row: adjRow, col: adjCol, type: 'attack' });
@@ -97,10 +104,19 @@ export const getValidMovesForPiece = (board, row, col, currentPlayer) => {
  * @param {number} col - Column index
  * @param {Array} validMoves - Array of valid moves
  * @param {Object} selectedPiece - Currently selected piece
+ * @param {Array} board - Game board
+ * @param {number} currentPlayer - Current player ID
  * @returns {string} CSS classes for the cell
  */
-export const getCellClasses = (row, col, validMoves, selectedPiece) => {
+export const getCellClasses = (row, col, validMoves, selectedPiece, board, currentPlayer) => {
   const classes = [];
+  
+  // Extra safety check - never highlight bases as valid moves for non-base units
+  const cell = board?.[row]?.[col];
+  if (cell && cell.value === 6 && cell.playerId === currentPlayer && 
+      selectedPiece && selectedPiece.value !== 6) {
+    return '';
+  }
   
   // Check if this cell is a valid move
   const validMove = validMoves.find(move => move.row === row && move.col === col);
