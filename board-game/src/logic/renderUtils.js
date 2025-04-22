@@ -1,4 +1,15 @@
 /**
+ * Determine the CSS class for a piece based on its player ID and value
+ * @param {Object} piece - The piece object (e.g., { playerId: 1, value: 4 })
+ * @returns {string} - The CSS class for the piece
+ */
+export const getPieceClass = (piece) => {
+  // Ensure piece exists before accessing properties
+  if (!piece) return ''; 
+  return `piece player-${piece.playerId} value-${piece.value}`;
+};
+
+/**
  * Get CSS classes for a cell based on its state
  * @param {number} row - Row index
  * @param {number} col - Column index

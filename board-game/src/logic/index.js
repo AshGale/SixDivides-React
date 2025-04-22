@@ -5,17 +5,33 @@
 
 // Board utilities
 export { 
-  getAdjacentTiles,
+  initializeBoard, 
+  // updateBoardState, // Removed - Doesn't exist in boardUtils
+  getAdjacentTiles, 
   isCellValid, 
-  cloneBoard 
+  cloneBoard, 
+  createEmptyBoard 
 } from './boardUtils';
 
 // Move validation
 export { 
+  isMoveValid, 
   getValidMovesForPiece 
 } from './moveValidation';
 
 // Rendering utilities
 export { 
+  getPieceClass, 
   getCellClasses 
 } from './renderUtils';
+
+// Gameplay utilities
+export { 
+  getStartingActions, 
+  checkWinCondition, 
+  findNextPlayerWithUnits, 
+  processMove, 
+  processCombine, 
+  processCombat, 
+  processBaseAction 
+} from './gameplayUtils';

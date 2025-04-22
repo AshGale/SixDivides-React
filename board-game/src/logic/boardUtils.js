@@ -1,4 +1,13 @@
-import { BOARD_SIZE } from '../constants/gameConstants';
+import { BOARD_SIZE, STARTING_POSITIONS } from '../constants/gameConstants';
+
+/**
+ * Create a deep copy of the board
+ * @param {Array} board - Game board
+ * @returns {Array} Deep copy of the board
+ */
+export const cloneBoard = (board) => {
+  return board.map(row => [...row]);
+};
 
 /**
  * Get adjacent tiles for a given position
@@ -14,7 +23,7 @@ export const getAdjacentTiles = (row, col) => {
     [row, col + 1], // right
   ];
   return adjacent.filter(([r, c]) => 
-    r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE
+    isCellValid(r, c) // Use isCellValid here for consistency
   );
 };
 
@@ -28,11 +37,24 @@ export const isCellValid = (row, col) => {
   return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 };
 
+// Moved from gameSlice.js
 /**
- * Create a deep copy of the board
- * @param {Array} board - Game board
- * @returns {Array} Deep copy of the board
+ * Helper function to create an empty board
  */
-export const cloneBoard = (board) => {
-  return board.map(row => [...row]);
+export const createEmptyBoard = () => Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
+
+/**
+ * Helper function to initialize the game board
+ */
+export const initializeBoard = (numPlayers) => {
+  const newBoard = createEmptyBoard();
+  const actualNumPlayers = Math.min(numPlayers, 4);
+  
+  // Place bases at starting positions
+  for (let i = 0; i < actualNumPlayers; i++) {
+    const [row, col] = STARTING_POSITIONS[i];
+    newBoard[row][col] = { playerId: i, value: 6 }; // Base value is 6
+  }
+  
+  return newBoard;
 };
