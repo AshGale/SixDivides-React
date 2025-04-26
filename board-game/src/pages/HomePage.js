@@ -1,11 +1,36 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSavedGames } from '../store/gameThunks';
+import LoadGameModal from '../components/modals/LoadGameModal';
 import './HomePage.css';
 
 /**
  * Home page component
  */
 const HomePage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [showLoadModal, setShowLoadModal] = useState(false);
+  const loadStatus = useSelector(state => state.game.loadStatus);
+
+  // Check if a game was successfully loaded and navigate to game screen
+  useEffect(() => {
+    if (loadStatus && loadStatus.success) {
+      navigate('/game');
+    }
+  }, [loadStatus, navigate]);
+
+  const handleLoadGame = () => {
+    // Fetch available saves before showing the modal
+    dispatch(fetchSavedGames());
+    setShowLoadModal(true);
+  };
+
+  const handleCloseLoadModal = () => {
+    setShowLoadModal(false);
+  };
+
   return (
     <div className="home-page">
       <div className="home-content">
@@ -15,9 +40,20 @@ const HomePage = () => {
           Capture enemy bases and conquer the board!
         </p>
         
-        <div className="home-buttons">
+        <div className="home-buttons vertical-buttons">
           <Link to="/new-game" className="home-button primary-button">
             New Game
+          </Link>
+          
+          <button 
+            onClick={handleLoadGame} 
+            className="home-button load-button"
+          >
+            Load Game
+          </button>
+          
+          <Link to="/map-editor" className="home-button editor-button">
+            Custom Map Editor
           </Link>
           
           <Link to="/how-to-play" className="home-button secondary-button">
@@ -25,6 +61,9 @@ const HomePage = () => {
           </Link>
         </div>
       </div>
+      
+      {/* Load Game Modal */}
+      {showLoadModal && <LoadGameModal onClose={handleCloseLoadModal} />}
     </div>
   );
 };

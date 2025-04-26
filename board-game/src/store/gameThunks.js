@@ -60,21 +60,27 @@ export const loadGame = createAsyncThunk(
       // Load game state
       const result = await persistenceAPI.loadGame(saveName);
       
-      if (result.success && result.data && result.data.gameState) {
-        // Dispatch action to load game state
-        dispatch(loadGameState(result.data.gameState));
+      if (result.success && result.data) {
+        // Extract the game state - could be in result.data.gameState (new format)
+        // or directly in result.data (old format)
+        const gameState = result.data.gameState || result.data;
         
-        // Clear status after 3 seconds
-        setTimeout(() => {
-          dispatch(clearSaveLoadStatus());
-        }, 3000);
-        
-        return result.data.gameState;
-      } else {
-        // Handle load failure
-        dispatch(loadGameState(null));
-        return null;
+        if (gameState) {
+          // Dispatch action to load game state
+          dispatch(loadGameState(gameState));
+          
+          // Clear status after 3 seconds
+          setTimeout(() => {
+            dispatch(clearSaveLoadStatus());
+          }, 3000);
+          
+          return gameState;
+        }
       }
+      
+      // Handle load failure
+      dispatch(loadGameState(null));
+      return null;
     } catch (error) {
       dispatch(loadGameState(null));
       throw error;

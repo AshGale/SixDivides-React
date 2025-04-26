@@ -14,13 +14,17 @@ import './GamePage.css';
 const GamePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { winner } = useSelector(state => state.game);
+  const gameState = useSelector(state => state.game);
+  const { winner, gameState: currentGameState } = gameState;
   const { aiThinking } = useAiTurn();
   
-  // Initialize the game on component mount
+  // Initialize the game on component mount only if no game is already loaded
   useEffect(() => {
-    dispatch(initializeGame());
-  }, [dispatch]);
+    // Only initialize if no game is in progress or if no board exists
+    if (currentGameState === 'NOT_STARTED' || !gameState.board || gameState.board.length === 0) {
+      dispatch(initializeGame());
+    }
+  }, [dispatch, currentGameState, gameState.board]);
   
   const handleBackToMenu = () => {
     navigate('/');

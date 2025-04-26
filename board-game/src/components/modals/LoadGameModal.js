@@ -36,8 +36,10 @@ const LoadGameModal = ({ onClose }) => {
     setError('');
     try {
       await dispatch(loadGame({ saveName: selectedSave.saveName })).unwrap();
-      // Close modal on successful load after a brief delay
-      setTimeout(() => onClose(), 1000);
+      
+      // Close modal on successful load after a slightly longer delay
+      // to ensure the game state is fully loaded
+      setTimeout(() => onClose(), 1500);
     } catch (err) {
       setError(`Failed to load game: ${err.message}`);
     }
