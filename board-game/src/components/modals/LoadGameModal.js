@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { fetchSavedGames, loadGame, deleteSavedGame } from '../../store/gameThunks';
 import './Modal.css';
 
 const LoadGameModal = ({ onClose }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const availableSaves = useSelector(state => state.game.availableSaves);
   const loadStatus = useSelector(state => state.game.loadStatus);
   const [loading, setLoading] = useState(true);
@@ -35,11 +37,16 @@ const LoadGameModal = ({ onClose }) => {
 
     setError('');
     try {
-      await dispatch(loadGame({ saveName: selectedSave.saveName })).unwrap();
+      // Load the game
+      const result = await dispatch(loadGame({ saveName: selectedSave.saveName })).unwrap();
       
-      // Close modal on successful load after a slightly longer delay
-      // to ensure the game state is fully loaded
-      setTimeout(() => onClose(), 1500);
+      // Close modal
+      onClose();
+      
+      // Navigate to game page directly
+      setTimeout(() => {
+        navigate('/game', { state: { fromLoad: true, loadedAt: new Date().getTime() } });
+      }, 100);
     } catch (err) {
       setError(`Failed to load game: ${err.message}`);
     }

@@ -14,10 +14,11 @@ const HomePage = () => {
   const [showLoadModal, setShowLoadModal] = useState(false);
   const loadStatus = useSelector(state => state.game.loadStatus);
 
-  // Check if a game was successfully loaded and navigate to game screen
+  // Handle successful game load
   useEffect(() => {
     if (loadStatus && loadStatus.success) {
-      navigate('/game');
+      // Navigate to game page with a flag indicating a game was just loaded
+      navigate('/game', { state: { fromLoad: true } });
     }
   }, [loadStatus, navigate]);
 
