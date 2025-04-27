@@ -28,6 +28,9 @@ const initialState = {
   winner: null,
   numPlayers: 4,
   turnHistory: [],
+  saveStatus: null, // Track save status for UI feedback
+  loadStatus: null, // Track load status for UI feedback
+  availableSaves: [], // List of available saves
 };
 
 export const gameSlice = createSlice({
@@ -243,6 +246,45 @@ export const gameSlice = createSlice({
     
     setNumPlayers: (state, action) => {
       state.numPlayers = action.payload;
+    },
+    
+    // Save game state action
+    saveGameState: (state, action) => {
+      // The actual saving happens in the thunk, this just updates UI state
+      state.saveStatus = action.payload;
+    },
+    
+    // Set available saves action
+    setAvailableSaves: (state, action) => {
+      state.availableSaves = action.payload;
+    },
+    
+    // Load game state action
+    loadGameState: (state, action) => {
+      // Replace the entire state with the loaded state
+      const loadedState = action.payload;
+      
+      // Only update if we have a valid state to load
+      if (loadedState) {
+        // Apply all properties from loaded state, preserving the current functions
+        Object.keys(loadedState).forEach(key => {
+          // Skip non-serializable parts or UI feedback properties
+          if (key !== 'saveStatus' && key !== 'loadStatus') {
+            state[key] = loadedState[key];
+          }
+        });
+        
+        // Update load status for UI feedback
+        state.loadStatus = { success: true, message: "Game loaded successfully" };
+      } else {
+        state.loadStatus = { success: false, message: "Failed to load game" };
+      }
+    },
+    
+    // Clear save/load status (to reset UI feedback)
+    clearSaveLoadStatus: (state) => {
+      state.saveStatus = null;
+      state.loadStatus = null;
     }
   },
 });
@@ -259,7 +301,11 @@ export const {
   decrementActions,
   endTurn,
   setShowTurnMessage,
-  setNumPlayers
+  setNumPlayers,
+  saveGameState,
+  loadGameState,
+  setAvailableSaves,
+  clearSaveLoadStatus
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
