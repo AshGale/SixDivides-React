@@ -20,6 +20,8 @@ const MapEditorPage = () => {
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [availableMaps, setAvailableMaps] = useState([]);
   const [selectedMap, setSelectedMap] = useState(null);
+  const [currentPlayer, setCurrentPlayer] = useState(0);
+  const [actionsRemaining, setActionsRemaining] = useState(3);
   
   // Load available maps on mount
   useEffect(() => {
@@ -78,10 +80,10 @@ const MapEditorPage = () => {
     // Create a game state that can be loaded
     const customMapState = {
       board: board,
-      currentPlayer: 0,
+      currentPlayer: currentPlayer,
       selectedPiece: null,
       validMoves: [],
-      actions: 0,
+      actions: actionsRemaining,
       gameState: 'NOT_STARTED',
       showTurnMessage: false,
       winner: null,
@@ -180,6 +182,15 @@ const MapEditorPage = () => {
           const sanitizedBoard = sanitizeBoard(gameData.board);
           setBoard(sanitizedBoard);
           
+          // Set current player and actions if available in loaded data
+          if (gameData.currentPlayer !== undefined) {
+            setCurrentPlayer(gameData.currentPlayer);
+          }
+          
+          if (gameData.actions !== undefined) {
+            setActionsRemaining(gameData.actions);
+          }
+          
           // Set map name (remove the prefix)
           const actualName = selectedMap.saveName.replace('custom-map-', '');
           setMapName(actualName);
@@ -260,6 +271,38 @@ const MapEditorPage = () => {
               placeholder="Enter map name..."
               className="map-name-input"
             />
+          </div>
+          
+          <div className="control-section">
+            <h3>Game Settings</h3>
+            <div className="game-settings">
+              <div className="setting-group">
+                <label>Starting Player:</label>
+                <select 
+                  value={currentPlayer}
+                  onChange={(e) => setCurrentPlayer(Number(e.target.value))}
+                  className="setting-select"
+                >
+                  {availablePlayers.map(player => (
+                    <option key={player.id} value={player.id}>
+                      {player.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="setting-group">
+                <label>Actions Remaining:</label>
+                <input 
+                  type="number" 
+                  min="0" 
+                  max="10"
+                  value={actionsRemaining}
+                  onChange={(e) => setActionsRemaining(Number(e.target.value))}
+                  className="setting-input"
+                />
+              </div>
+            </div>
           </div>
           
           <div className="control-section">
