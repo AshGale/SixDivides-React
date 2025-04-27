@@ -1,90 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { 
   PLAYERS, 
-  UNIT_TYPES, 
-  STARTING_POSITIONS, 
-  BOARD_SIZE,
   GAME_STATES 
 } from '../constants/gameConstants';
-
-/**
- * Helper function to get starting actions for a player
- */
-const getStartingActions = (board, playerId) => {
-  const playerPieces = board.flat().filter(cell => cell && cell.playerId === playerId);
-  return playerPieces.reduce((total, piece) => total + (UNIT_TYPES[piece.value]?.actions || 0), 0);
-};
-
-/**
- * Helper function to create an empty board
- */
-const createEmptyBoard = () => Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
-
-/**
- * Helper function to initialize the game board
- */
-const initializeBoard = (numPlayers) => {
-  const newBoard = createEmptyBoard();
-  const actualNumPlayers = Math.min(numPlayers, 4);
-  
-  // Place bases at starting positions
-  for (let i = 0; i < actualNumPlayers; i++) {
-    const [row, col] = STARTING_POSITIONS[i];
-    newBoard[row][col] = { playerId: i, value: 6 }; // Base value is 6
-  }
-  
-  return newBoard;
-};
-
-/**
- * Check if a player has won the game
- */
-const checkWinCondition = (board) => {
-  const playersWithUnits = new Set();
-  board.flat().forEach(cell => {
-    if (cell) {
-      playersWithUnits.add(cell.playerId);
-    }
-  });
-  
-  if (playersWithUnits.size === 1) {
-    return Array.from(playersWithUnits)[0];
-  }
-  return null;
-};
-
-/**
- * Find the next player with units on the board
- */
-const findNextPlayerWithUnits = (board, currentPlayer, numPlayers) => {
-  let nextPlayer = (currentPlayer + 1) % numPlayers;
-  let playersChecked = 0;
-  
-  while (playersChecked < numPlayers) {
-    const playerHasUnits = board.flat().some(cell => 
-      cell && cell.playerId === nextPlayer
-    );
-    
-    if (playerHasUnits) {
-      const startingActions = getStartingActions(board, nextPlayer);
-      // If the next player has no actions, skip them too
-      if (startingActions > 0) {
-        return nextPlayer;
-      }
-    }
-    
-    nextPlayer = (nextPlayer + 1) % numPlayers;
-    playersChecked++;
-  }
-  
-  // If we've checked all players and none have actions, return the original next player
-  // This is a fallback to prevent infinite loops
-  return (currentPlayer + 1) % numPlayers;
-};
+// Import centralized logic functions
+import {
+  createEmptyBoard, 
+  initializeBoard as initializeBoardLogic,
+  getStartingActions,
+  checkWinCondition,
+  findNextPlayerWithUnits,
+  processMove,
+  processCombine,
+  processCombat,
+  processBaseAction,
+  cloneBoard // Needed for history tracking potentially
+} from '../logic';
 
 const initialState = {
   currentPlayer: 0,
-  board: createEmptyBoard(),
+  board: createEmptyBoard(), // Use imported function for initial state
   selectedPiece: null,
   validMoves: [],
   actions: 0,
@@ -93,6 +28,9 @@ const initialState = {
   winner: null,
   numPlayers: 4,
   turnHistory: [],
+  saveStatus: null, // Track save status for UI feedback
+  loadStatus: null, // Track load status for UI feedback
+  availableSaves: [], // List of available saves
 };
 
 export const gameSlice = createSlice({
@@ -101,21 +39,25 @@ export const gameSlice = createSlice({
   reducers: {
     initializeGame: (state, action) => {
       const numPlayers = action.payload?.numPlayers || state.numPlayers;
-      state.board = initializeBoard(numPlayers);
+      // Use logic function to initialize board
+      state.board = initializeBoardLogic(numPlayers); 
       state.currentPlayer = 0;
       state.selectedPiece = null;
       state.validMoves = [];
       state.winner = null;
       state.gameState = GAME_STATES.IN_PROGRESS;
-      state.actions = getStartingActions(state.board, 0);
-      state.turnHistory = [];
+      // Use logic function to get starting actions
+      state.actions = getStartingActions(state.board, 0); 
+      state.turnHistory = [{ type: 'initialize', numPlayers }];
       
       // If the first player has no actions, move to the next player
-      if (state.actions === 0) {
-        const nextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, numPlayers);
+      if (state.actions === 0 && !state.winner) {
+        // Use logic function to find next player
+        const nextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, numPlayers); 
         state.currentPlayer = nextPlayer;
-        state.actions = getStartingActions(state.board, nextPlayer);
+        state.actions = getStartingActions(state.board, nextPlayer); // Use logic function
         state.showTurnMessage = true;
+        state.turnHistory.push({ type: 'autoEndTurn', reason: 'no actions', nextPlayer });
       }
     },
     
@@ -135,196 +77,125 @@ export const gameSlice = createSlice({
     
     movePiece: (state, action) => {
       const { fromRow, fromCol, toRow, toCol } = action.payload;
-      const piece = state.board[fromRow][fromCol];
-      
-      if (!piece) return;
-      
-      // Create a new board with the piece moved
-      const newBoard = [...state.board.map(row => [...row])];
-      newBoard[toRow][toCol] = piece;
-      newBoard[fromRow][fromCol] = null;
-      
-      state.board = newBoard;
-      state.actions -= 1;
+      const pieceBefore = cloneBoard(state.board)[fromRow][fromCol]; // For history
+      // Use logic function to process the move
+      const newBoard = processMove(state.board, fromRow, fromCol, toRow, toCol);
+
+      if (newBoard !== state.board) { // Check if the board actually changed
+        state.board = newBoard;
+        state.actions -= 1;
+        state.turnHistory.push({ 
+          type: 'move', 
+          player: state.currentPlayer, 
+          from: { row: fromRow, col: fromCol, piece: pieceBefore }, 
+          to: { row: toRow, col: toCol }
+        });
+      } else {
+        // Handle case where move didn't happen (e.g., source piece didn't exist)
+        // Optionally log an error or handle gracefully
+      }
       state.selectedPiece = null;
       state.validMoves = [];
-      
-      // Check win condition
-      const winner = checkWinCondition(newBoard);
-      if (winner !== null) {
-        state.winner = PLAYERS[winner];
-        state.gameState = GAME_STATES.FINISHED;
-      }
-      
-      // Add to turn history
-      state.turnHistory.push({
-        type: 'move',
-        player: state.currentPlayer,
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        piece
-      });
     },
     
     combineUnits: (state, action) => {
       const { fromRow, fromCol, toRow, toCol } = action.payload;
-      const sourceUnit = state.board[fromRow][fromCol];
-      const targetUnit = state.board[toRow][toCol];
+      const boardBefore = cloneBoard(state.board); // For history
+      const sourcePieceBefore = boardBefore[fromRow][fromCol];
+      const targetPieceBefore = boardBefore[toRow][toCol];
       
-      if (!sourceUnit || !targetUnit) return;
+      // Use logic function to process combine
+      const newBoard = processCombine(state.board, fromRow, fromCol, toRow, toCol);
       
-      const newBoard = [...state.board.map(row => [...row])];
-      const combinedValue = sourceUnit.value + targetUnit.value;
-      
-      if (combinedValue <= 6) {
-        // Units combine to a new unit with summed value
-        newBoard[toRow][toCol] = { 
-          playerId: targetUnit.playerId, 
-          value: combinedValue 
-        };
-        newBoard[fromRow][fromCol] = null;
-      } else if (targetUnit.value < 6) {
-        // Target becomes a base (6), source keeps remainder
-        newBoard[toRow][toCol] = { 
-          playerId: targetUnit.playerId, 
-          value: 6 
-        };
-        newBoard[fromRow][fromCol] = { 
-          playerId: sourceUnit.playerId, 
-          value: combinedValue - 6 
-        };
+      if (newBoard !== state.board) {
+        state.board = newBoard;
+        state.actions -= 1;
+        state.turnHistory.push({
+          type: 'combine',
+          player: state.currentPlayer,
+          from: { row: fromRow, col: fromCol, piece: sourcePieceBefore },
+          to: { row: toRow, col: toCol, pieceBefore: targetPieceBefore, pieceAfter: newBoard[toRow][toCol] }
+        });
+        // Check win condition after combine
+        const winnerId = checkWinCondition(newBoard);
+        if (winnerId !== null) {
+          state.winner = PLAYERS[winnerId];
+          state.gameState = GAME_STATES.FINISHED;
+        }
+      } else {
+         // Handle case where combine didn't happen
       }
-      
-      state.board = newBoard;
-      state.actions -= 1;
       state.selectedPiece = null;
       state.validMoves = [];
-      
-      // Add to turn history
-      state.turnHistory.push({
-        type: 'combine',
-        player: state.currentPlayer,
-        from: { row: fromRow, col: fromCol },
-        to: { row: toRow, col: toCol },
-        sourceUnit,
-        targetUnit,
-        result: newBoard[toRow][toCol],
-        remainder: newBoard[fromRow][fromCol]
-      });
     },
     
     handleCombat: (state, action) => {
       const { attackerRow, attackerCol, defenderRow, defenderCol } = action.payload;
-      const attacker = state.board[attackerRow][attackerCol];
-      const defender = state.board[defenderRow][defenderCol];
+      const boardBefore = cloneBoard(state.board); // For history
+      const attackerBefore = boardBefore[attackerRow][attackerCol];
+      const defenderBefore = boardBefore[defenderRow][defenderCol];
       
-      if (!attacker || !defender) return;
+      // Use logic function to process combat
+      const newBoard = processCombat(state.board, attackerRow, attackerCol, defenderRow, defenderCol);
       
-      const newBoard = [...state.board.map(row => [...row])];
-      
-      if (attacker.value > defender.value) {
-        // Attacker wins
-        const newValue = Math.max(1, attacker.value - defender.value);
-        newBoard[defenderRow][defenderCol] = { 
-          playerId: attacker.playerId, 
-          value: newValue 
-        };
-        newBoard[attackerRow][attackerCol] = null;
-      } else {
-        // Defender wins or ties
-        if (attacker.value === defender.value) {
-          // Equal values - both are removed
-          newBoard[defenderRow][defenderCol] = null;
+      if (newBoard !== state.board) {
+        state.board = newBoard;
+        state.actions -= 1;
+         // Check win condition after combat
+        const winnerId = checkWinCondition(newBoard);
+        if (winnerId !== null) {
+          state.winner = PLAYERS[winnerId];
+          state.gameState = GAME_STATES.FINISHED;
         } else {
-          // Defender survives with reduced value
-          newBoard[defenderRow][defenderCol] = { 
-            playerId: defender.playerId, 
-            value: defender.value - attacker.value 
-          };
+          // Only record history if game is not over
+          state.turnHistory.push({
+            type: 'combat',
+            player: state.currentPlayer,
+            attacker: { row: attackerRow, col: attackerCol, unit: attackerBefore },
+            defender: { row: defenderRow, col: defenderCol, unit: defenderBefore },
+            boardAfter: cloneBoard(newBoard) // Record state after combat
+          });
         }
-        newBoard[attackerRow][attackerCol] = null;
+      } else {
+        // Handle case where combat didn't happen 
       }
-      
-      state.board = newBoard;
-      state.actions -= 1;
       state.selectedPiece = null;
       state.validMoves = [];
-      
-      // Check win condition
-      const winner = checkWinCondition(newBoard);
-      if (winner !== null) {
-        state.winner = PLAYERS[winner];
-        state.gameState = GAME_STATES.FINISHED;
-      }
-      
-      // Add to turn history
-      state.turnHistory.push({
-        type: 'combat',
-        player: state.currentPlayer,
-        attacker: { row: attackerRow, col: attackerCol, unit: attacker },
-        defender: { row: defenderRow, col: defenderCol, unit: defender },
-        result: newBoard[defenderRow][defenderCol]
-      });
     },
     
     handleBaseAction: (state, action) => {
       const { baseRow, baseCol, targetRow, targetCol, actionType } = action.payload;
-      const base = state.board[baseRow][baseCol];
-      const target = state.board[targetRow][targetCol];
+      const boardBefore = cloneBoard(state.board); // For history
+      const targetBefore = boardBefore[targetRow][targetCol];
       
-      if (!base || base.value !== 6) return;
+      // Use logic function to process base action
+      const newBoard = processBaseAction(state.board, baseRow, baseCol, targetRow, targetCol, actionType);
       
-      const newBoard = [...state.board.map(row => [...row])];
-      
-      if (actionType === 'create' && !target) {
-        // Create a new unit (value 1) in an empty adjacent cell
-        newBoard[targetRow][targetCol] = { 
-          playerId: base.playerId, 
-          value: 1 
-        };
-      } else if (actionType === 'upgrade' && target && target.playerId === base.playerId) {
-        // Upgrade a friendly unit (max value 6)
-        if (target.value < 6) {
-          newBoard[targetRow][targetCol] = { 
-            playerId: target.playerId, 
-            value: target.value + 1 
-          };
-        }
-      } else if (actionType === 'reduce' && target && target.playerId !== base.playerId) {
-        // Reduce an enemy unit by 1
-        if (target.value > 1) {
-          newBoard[targetRow][targetCol] = { 
-            playerId: target.playerId, 
-            value: target.value - 1 
-          };
+      if (newBoard !== state.board) {
+        state.board = newBoard;
+        state.actions -= 1;
+        // Check win condition after base action
+        const winnerId = checkWinCondition(newBoard);
+        if (winnerId !== null) {
+          state.winner = PLAYERS[winnerId];
+          state.gameState = GAME_STATES.FINISHED;
         } else {
-          // Remove the unit if reduced to 0
-          newBoard[targetRow][targetCol] = null;
+          // Record history
+          state.turnHistory.push({
+            type: 'baseAction',
+            player: state.currentPlayer,
+            base: { row: baseRow, col: baseCol },
+            target: { row: targetRow, col: targetCol },
+            actionType,
+            targetBefore: targetBefore,
+            targetAfter: newBoard[targetRow][targetCol]
+          });
         }
+      } else {
+         // Handle case where base action didn't happen
       }
-      
-      state.board = newBoard;
-      state.actions -= 1;
       state.selectedPiece = null;
       state.validMoves = [];
-      
-      // Check win condition
-      const winner = checkWinCondition(newBoard);
-      if (winner !== null) {
-        state.winner = PLAYERS[winner];
-        state.gameState = GAME_STATES.FINISHED;
-      }
-      
-      // Add to turn history
-      state.turnHistory.push({
-        type: 'baseAction',
-        player: state.currentPlayer,
-        base: { row: baseRow, col: baseCol },
-        target: { row: targetRow, col: targetCol },
-        actionType,
-        targetBefore: target,
-        targetAfter: newBoard[targetRow][targetCol]
-      });
     },
     
     decrementActions: (state) => {
@@ -332,27 +203,41 @@ export const gameSlice = createSlice({
     },
     
     endTurn: (state) => {
-      // Move to next player with units and actions
+      // Check win condition before ending turn (in case last action caused win)
+      const winnerId = checkWinCondition(state.board);
+      if (winnerId !== null) {
+        state.winner = PLAYERS[winnerId];
+        state.gameState = GAME_STATES.FINISHED;
+        // Don't proceed to next turn if game is over
+        return; 
+      }
+      
+      // Use logic function to find next player
       const nextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, state.numPlayers);
+      const prevPlayer = state.currentPlayer; // Store previous player for history
       
       state.currentPlayer = nextPlayer;
-      state.actions = getStartingActions(state.board, nextPlayer);
+      // Use logic function to get starting actions
+      state.actions = getStartingActions(state.board, nextPlayer); 
       state.selectedPiece = null;
       state.validMoves = [];
       state.showTurnMessage = true;
       
-      // If the next player has no actions, end their turn immediately
-      if (state.actions === 0) {
-        // We'll handle this in the component with useEffect
-        // to avoid an infinite loop in the reducer
-      }
-      
-      // Add to turn history
       state.turnHistory.push({
         type: 'endTurn',
-        prevPlayer: state.currentPlayer,
+        prevPlayer,
         nextPlayer
       });
+
+      // Handle case where the next player immediately has no actions (e.g., all units were just destroyed)
+      if (state.actions === 0 && state.gameState !== GAME_STATES.FINISHED) {
+         const nextNextPlayer = findNextPlayerWithUnits(state.board, state.currentPlayer, state.numPlayers);
+         state.currentPlayer = nextNextPlayer;
+         state.actions = getStartingActions(state.board, nextNextPlayer); 
+         state.turnHistory.push({ type: 'autoEndTurn', reason: 'no actions', prevPlayer: nextPlayer, nextPlayer: nextNextPlayer });
+         // Potentially loop again if this player also has no actions, although checkWinCondition should prevent infinite loops ideally.
+         // For robustness, consider adding a maximum loop count or ensuring findNextPlayer always eventually finds someone or triggers win/draw.
+      }
     },
     
     setShowTurnMessage: (state, action) => {
@@ -361,6 +246,45 @@ export const gameSlice = createSlice({
     
     setNumPlayers: (state, action) => {
       state.numPlayers = action.payload;
+    },
+    
+    // Save game state action
+    saveGameState: (state, action) => {
+      // The actual saving happens in the thunk, this just updates UI state
+      state.saveStatus = action.payload;
+    },
+    
+    // Set available saves action
+    setAvailableSaves: (state, action) => {
+      state.availableSaves = action.payload;
+    },
+    
+    // Load game state action
+    loadGameState: (state, action) => {
+      // Replace the entire state with the loaded state
+      const loadedState = action.payload;
+      
+      // Only update if we have a valid state to load
+      if (loadedState) {
+        // Apply all properties from loaded state, preserving the current functions
+        Object.keys(loadedState).forEach(key => {
+          // Skip non-serializable parts or UI feedback properties
+          if (key !== 'saveStatus' && key !== 'loadStatus') {
+            state[key] = loadedState[key];
+          }
+        });
+        
+        // Update load status for UI feedback
+        state.loadStatus = { success: true, message: "Game loaded successfully" };
+      } else {
+        state.loadStatus = { success: false, message: "Failed to load game" };
+      }
+    },
+    
+    // Clear save/load status (to reset UI feedback)
+    clearSaveLoadStatus: (state) => {
+      state.saveStatus = null;
+      state.loadStatus = null;
     }
   },
 });
@@ -377,7 +301,11 @@ export const {
   decrementActions,
   endTurn,
   setShowTurnMessage,
-  setNumPlayers
+  setNumPlayers,
+  saveGameState,
+  loadGameState,
+  setAvailableSaves,
+  clearSaveLoadStatus
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

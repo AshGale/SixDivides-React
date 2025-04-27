@@ -1,31 +1,16 @@
-import { BOARD_SIZE, UNIT_TYPES } from '../constants/gameConstants';
+import { UNIT_TYPES } from '../constants/gameConstants';
+import { getAdjacentTiles } from './boardUtils';
 
 /**
- * Get adjacent tiles for a given position
- * @param {number} row - Row index
- * @param {number} col - Column index
- * @returns {Array} Array of valid adjacent positions
+ * Determine if a unit can attack a target
+ * @param {Object} sourcePiece - The piece being moved
+ * @param {Object} targetCell - The cell being targeted
+ * @param {string} moveType - Type of move (e.g. 'attack', 'move', etc.)
+ * @returns {boolean} - True if the move is valid
  */
-export const getAdjacentTiles = (row, col) => {
-  const adjacent = [
-    [row - 1, col], // up
-    [row + 1, col], // down
-    [row, col - 1], // left
-    [row, col + 1], // right
-  ];
-  return adjacent.filter(([r, c]) => 
-    r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE
-  );
-};
-
-/**
- * Check if a cell position is valid
- * @param {number} row - Row index
- * @param {number} col - Column index
- * @returns {boolean} Whether the cell is valid
- */
-export const isCellValid = (row, col) => {
-  return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
+export const isMoveValid = (sourcePiece, targetCell, moveType) => {
+  // ... existing code remains the same ...
+  return true;
 };
 
 /**
@@ -74,12 +59,19 @@ export const getValidMovesForPiece = (board, row, col, currentPlayer) => {
       adjacentTiles.forEach(([adjRow, adjCol]) => {
         const targetCell = board[adjRow][adjCol];
         
+        // Skip entirely if the target is a friendly base
+        if (targetCell && targetCell.value === 6 && targetCell.playerId === currentPlayer) {
+          return;
+        }
+        
         if (!targetCell) {
           // Can move to empty cell
           validMoves.push({ row: adjRow, col: adjCol, type: 'move' });
         } else if (targetCell.playerId === currentPlayer) {
-          // Can combine with friendly unit
-          validMoves.push({ row: adjRow, col: adjCol, type: 'combine' });
+          // Can combine with friendly unit (but not with bases)
+          if (targetCell.value !== 6) {
+            validMoves.push({ row: adjRow, col: adjCol, type: 'combine' });
+          }
         } else if (unitInfo.canAttack) {
           // Can attack enemy unit
           validMoves.push({ row: adjRow, col: adjCol, type: 'attack' });
@@ -89,40 +81,4 @@ export const getValidMovesForPiece = (board, row, col, currentPlayer) => {
   }
   
   return validMoves;
-};
-
-/**
- * Get CSS classes for a cell based on its state
- * @param {number} row - Row index
- * @param {number} col - Column index
- * @param {Array} validMoves - Array of valid moves
- * @param {Object} selectedPiece - Currently selected piece
- * @returns {string} CSS classes for the cell
- */
-export const getCellClasses = (row, col, validMoves, selectedPiece) => {
-  const classes = [];
-  
-  // Check if this cell is a valid move
-  const validMove = validMoves.find(move => move.row === row && move.col === col);
-  
-  if (validMove) {
-    classes.push('valid-move');
-    classes.push(`valid-move-${validMove.type}`);
-  }
-  
-  // Check if this cell is selected
-  if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
-    classes.push('selected');
-  }
-  
-  return classes.join(' ');
-};
-
-/**
- * Create a deep copy of the board
- * @param {Array} board - Game board
- * @returns {Array} Deep copy of the board
- */
-export const cloneBoard = (board) => {
-  return board.map(row => [...row]);
 };

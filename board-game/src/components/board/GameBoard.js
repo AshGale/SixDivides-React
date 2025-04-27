@@ -12,7 +12,7 @@ import {
   endTurn,
   setShowTurnMessage
 } from '../../store/gameSlice';
-import { getValidMovesForPiece, getCellClasses } from '../../utils/gameUtils';
+import { getValidMovesForPiece, getCellClasses } from '../../logic';
 import './GameBoard.css';
 
 /**
@@ -146,7 +146,7 @@ const GameBoard = () => {
               row={rowIndex}
               col={colIndex}
               cell={cell}
-              className={getCellClasses(rowIndex, colIndex, validMoves, selectedPiece)}
+              className={getCellClasses(rowIndex, colIndex, validMoves, selectedPiece, board, currentPlayer)}
               onClick={handleCellClick}
             />
           ))}

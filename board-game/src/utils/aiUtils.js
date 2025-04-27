@@ -1,4 +1,4 @@
-import { getValidMovesForPiece } from './gameUtils';
+import { getValidMovesForPiece } from '../logic';
 import { UNIT_TYPES } from '../constants/gameConstants';
 
 /**
@@ -157,73 +157,6 @@ export const scoreDefensiveMove = (move, board, playerId) => {
 };
 
 /**
- * Verify if a move is valid (additional validation)
- * @param {Object} move - Move to validate
- * @param {Array} board - Current game board
- * @returns {boolean} Whether the move is valid
- */
-export const isValidMove = (move, board) => {
-  const { fromRow, fromCol, toRow, toCol, type, isBase } = move;
-  
-  // Ensure source piece exists
-  const sourcePiece = board[fromRow][fromCol];
-  if (!sourcePiece) return false;
-  
-  // Ensure target position is within bounds
-  if (toRow < 0 || toRow >= board.length || toCol < 0 || toCol >= board[0].length) {
-    return false;
-  }
-  
-  const targetPiece = board[toRow][toCol];
-  
-  // Base-specific validation
-  if (isBase) {
-    // Base can't move
-    if (type === 'move') return false;
-    
-    // For upgrades, target must be friendly and not already max value
-    if (type === 'upgrade') {
-      return targetPiece && 
-             targetPiece.playerId === sourcePiece.playerId && 
-             targetPiece.value < 6;
-    }
-    
-    // For creation, target must be empty
-    if (type === 'create') {
-      return !targetPiece;
-    }
-    
-    // For attacks, target must be enemy
-    if (type === 'attack') {
-      return targetPiece && targetPiece.playerId !== sourcePiece.playerId;
-    }
-  } 
-  // Regular unit validation
-  else {
-    // For movement, target must be empty
-    if (type === 'move') {
-      return !targetPiece && UNIT_TYPES[sourcePiece.value].canMove;
-    }
-    
-    // For combining, target must be friendly
-    if (type === 'combine') {
-      return targetPiece && 
-             targetPiece.playerId === sourcePiece.playerId && 
-             (targetPiece.value < 6 || sourcePiece.value < 6); // At least one must not be a base
-    }
-    
-    // For attacks, target must be enemy and source must be able to attack
-    if (type === 'attack') {
-      return targetPiece && 
-             targetPiece.playerId !== sourcePiece.playerId && 
-             UNIT_TYPES[sourcePiece.value].canAttack;
-    }
-  }
-  
-  return false;
-};
-
-/**
  * Select the best move for the AI based on the strategy
  * @param {Array} board - Current game board
  * @param {number} playerId - AI player ID
@@ -237,15 +170,8 @@ export const selectBestMove = (board, playerId, strategy) => {
     return null;
   }
   
-  // Additional validation to ensure moves are valid
-  const validMoves = possibleMoves.filter(move => isValidMove(move, board));
-  
-  if (validMoves.length === 0) {
-    return null;
-  }
-  
-  // Score each move based on the strategy
-  const scoredMoves = validMoves.map(move => {
+  // Score each possible move based on the strategy (assuming getAllPossibleMoves returns only valid moves)
+  const scoredMoves = possibleMoves.map(move => { // Use possibleMoves directly
     let score;
     
     switch (strategy) {

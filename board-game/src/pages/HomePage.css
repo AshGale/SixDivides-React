@@ -38,6 +38,22 @@
   margin-top: 20px;
 }
 
+/* Vertical button layout */
+.vertical-buttons {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.vertical-buttons .home-button {
+  width: 100%;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
 .home-button {
   display: inline-block;
   padding: 15px 30px;
@@ -47,6 +63,7 @@
   border-radius: 8px;
   transition: all 0.3s ease;
   cursor: pointer;
+  border: none; /* Ensure buttons don't have borders */
 }
 
 .primary-button {
@@ -59,6 +76,30 @@
   background-color: #45a049;
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(76, 175, 80, 0.4);
+}
+
+.load-button {
+  background-color: #FF9800;
+  color: white;
+  box-shadow: 0 4px 6px rgba(255, 152, 0, 0.3);
+}
+
+.load-button:hover {
+  background-color: #F57C00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(255, 152, 0, 0.4);
+}
+
+.editor-button {
+  background-color: #9C27B0;
+  color: white;
+  box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
+}
+
+.editor-button:hover {
+  background-color: #7B1FA2;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(156, 39, 176, 0.4);
 }
 
 .secondary-button {

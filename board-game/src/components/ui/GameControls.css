@@ -1,0 +1,45 @@
+.game-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.game-control-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.game-control-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.game-control-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-btn {
+  background-color: #28a745;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.load-btn {
+  background-color: #17a2b8;
+}
+
+.load-btn:hover:not(:disabled) {
+  background-color: #138496;
+}
