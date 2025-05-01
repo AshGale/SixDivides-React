@@ -3,6 +3,7 @@
  * Handles saving and loading game states
  * Currently uses localStorage, but designed to be extended to use a backend API
  */
+import { getScenarioById, getAvailableScenarios, registerScenario } from '../constants/scenarios';
 
 // Helper to serialize game state to a storable format
 export const serializeGameState = (gameState) => {
@@ -137,5 +138,84 @@ export const persistenceAPI = {
     
     // For now, just delete from localStorage
     return deleteSavedGame(saveName);
+  },
+  
+  // Get available predefined scenarios
+  getScenarios: async () => {
+    // Return predefined scenarios from constants
+    return { success: true, scenarios: getAvailableScenarios() };
+  },
+  
+  // Load a specific scenario by ID
+  loadScenario: async (scenarioId) => {
+    try {
+      const scenario = getScenarioById(scenarioId);
+      if (!scenario) {
+        return { success: false, error: "Scenario not found" };
+      }
+      
+      // Log the scenario data for debugging
+      console.log('Found scenario:', scenarioId, scenario);
+      
+      // Make sure gameState contains the board
+      if (!scenario.gameState || !scenario.gameState.board) {
+        console.error('Scenario missing board data:', scenario);
+        return { success: false, error: "Invalid scenario data: missing board" };
+      }
+      
+      // For debugging, log the board structure
+      console.log('Scenario board:', scenario.gameState.board);
+      
+      return { 
+        success: true, 
+        data: {
+          // Include the complete game state directly
+          gameState: scenario.gameState,
+          saveName: `scenario-${scenarioId}`,
+          timestamp: new Date().toISOString(),
+          isScenario: true
+        } 
+      };
+    } catch (error) {
+      console.error("Failed to load scenario:", error);
+      return { success: false, error: error.message };
+    }
+  },
+  
+  // Save a new scenario (in a real app, this would be server-side)
+  saveScenario: async (scenario) => {
+    try {
+      // In a real implementation, this would be a server API request
+      // For now, we'll register it to our runtime scenarios
+      console.log('saveScenario called - would save scenario to a server database:', scenario);
+      
+      // Register the scenario with our runtime registry
+      registerScenario(scenario);
+      
+      // Simulate server response
+      return { 
+        success: true, 
+        message: 'Scenario saved successfully! (Please note: in this demo, scenarios are not permanently saved and will be available only until the page is reloaded.)'
+      };
+      
+      /* In a real implementation with a server, we'd do something like:
+      const response = await fetch('/api/scenarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(scenario),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save scenario to server');
+      }
+      
+      return await response.json();
+      */
+    } catch (error) {
+      console.error('Error saving scenario:', error);
+      return { success: false, error: error.message };
+    }
   }
 };

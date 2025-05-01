@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PLAYERS, UNIT_TYPES, BOARD_SIZE } from '../constants/gameConstants';
 import { createEmptyBoard } from '../logic/boardUtils';
 import { setAvailableSaves } from '../store/gameSlice';
-import { saveGameToLocalStorage, getAllSavedGames, loadGameFromLocalStorage } from '../services/persistenceService';
+import { saveGameToLocalStorage, getAllSavedGames, loadGameFromLocalStorage, persistenceAPI } from '../services/persistenceService';
 import './MapEditorPage.css';
 
 const MapEditorPage = () => {
@@ -16,12 +16,14 @@ const MapEditorPage = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(0);
   const [selectedDiceValue, setSelectedDiceValue] = useState(1);
   const [mapName, setMapName] = useState('');
+  const [mapDescription, setMapDescription] = useState('');
   const [saveStatus, setSaveStatus] = useState(null);
   const [loadModalOpen, setLoadModalOpen] = useState(false);
   const [availableMaps, setAvailableMaps] = useState([]);
   const [selectedMap, setSelectedMap] = useState(null);
   const [currentPlayer, setCurrentPlayer] = useState(0);
   const [actionsRemaining, setActionsRemaining] = useState(3);
+  const [saveAsScenario, setSaveAsScenario] = useState(false);
   
   // Load available maps on mount
   useEffect(() => {
@@ -91,21 +93,55 @@ const MapEditorPage = () => {
       turnHistory: [{ type: 'customMap', createdAt: new Date().toISOString() }],
     };
     
-    // Save to localStorage with a custom prefix
-    const saveName = `custom-map-${mapName}`;
-    const result = saveGameToLocalStorage(customMapState, saveName);
-    
-    if (result.success) {
-      setSaveStatus({ success: true, message: 'Map saved successfully' });
-      
-      // Update available saves in Redux
-      const saveResult = getAllSavedGames();
-      if (saveResult.success) {
-        dispatch(setAvailableSaves(saveResult.saves));
-        loadAvailableMaps(); 
+    // If saving as scenario, add to scenarios
+    if (saveAsScenario) {
+      if (!mapDescription.trim()) {
+        setSaveStatus({ success: false, message: 'Please enter a map description for the scenario' });
+        return;
       }
-    } else {
-      setSaveStatus({ success: false, message: 'Failed to save map' });
+      
+      // Convert the map to a scenario format and save it
+      const scenarioId = mapName.toLowerCase().replace(/\s+/g, '-');
+      
+      const newScenario = {
+        id: scenarioId,
+        name: mapName,
+        description: mapDescription,
+        gameState: customMapState, // Already includes the board
+        createdAt: new Date().toISOString()
+      };
+      
+      // Add scenario to constants/scenarios.js
+      persistenceAPI.saveScenario(newScenario)
+        .then(result => {
+          if (result.success) {
+            setSaveStatus({ success: true, message: result.message || 'Scenario saved successfully for all users' });
+          } else {
+            setSaveStatus({ success: false, message: `Failed to save scenario: ${result.error}` });
+          }
+        })
+        .catch(error => {
+          setSaveStatus({ success: false, message: `Error saving scenario: ${error.message}` });
+        });
+    } 
+    // Regular local save
+    else {
+      // Save to localStorage with a custom prefix
+      const saveName = `custom-map-${mapName}`;
+      const result = saveGameToLocalStorage(customMapState, saveName);
+      
+      if (result.success) {
+        setSaveStatus({ success: true, message: 'Map saved successfully' });
+        
+        // Update available saves in Redux
+        const saveResult = getAllSavedGames();
+        if (saveResult.success) {
+          dispatch(setAvailableSaves(saveResult.saves));
+          loadAvailableMaps(); 
+        }
+      } else {
+        setSaveStatus({ success: false, message: 'Failed to save map' });
+      }
     }
   };
   
@@ -274,6 +310,28 @@ const MapEditorPage = () => {
           </div>
           
           <div className="control-section">
+            <h3>Map Description</h3>
+            <textarea 
+              value={mapDescription} 
+              onChange={(e) => setMapDescription(e.target.value)}
+              placeholder="Enter map description (required for scenarios)..."
+              className="map-description-input"
+              disabled={!saveAsScenario}
+            />
+            
+            <div className="scenario-option">
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={saveAsScenario} 
+                  onChange={(e) => setSaveAsScenario(e.target.checked)} 
+                />
+                Save as global scenario (available to all users)
+              </label>
+            </div>
+          </div>
+          
+          <div className="control-section">
             <h3>Game Settings</h3>
             <div className="game-settings">
               <div className="setting-group">
@@ -337,7 +395,7 @@ const MapEditorPage = () => {
           
           <div className="editor-actions">
             <button className="editor-button primary-button" onClick={saveMap}>
-              Save Custom Map
+              {saveAsScenario ? 'Save as Scenario' : 'Save Custom Map'}
             </button>
             <button className="editor-button secondary-button" onClick={openLoadModal}>
               Load Existing Map

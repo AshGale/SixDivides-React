@@ -53,6 +53,10 @@ const HomePage = () => {
             Load Game
           </button>
           
+          <Link to="/scenarios" className="home-button scenario-button">
+            Scenario Maps
+          </Link>
+          
           <Link to="/map-editor" className="home-button editor-button">
             Custom Map Editor
           </Link>

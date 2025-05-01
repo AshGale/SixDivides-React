@@ -113,3 +113,12 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(33, 150, 243, 0.4);
 }
+
+.scenario-button {
+  background-color: #7e57c2;
+  color: white;
+}
+
+.scenario-button:hover {
+  background-color: #673ab7;
+}
