@@ -101,13 +101,13 @@ export const deleteSavedGame = (saveName) => {
 
 // Mock API service for future implementation
 export const persistenceAPI = {
-  // Base URL for the future API server
-  baseUrl: 'http://localhost:3001/api/games',
+  // Base URL for the API server
+  baseUrl: 'http://localhost:3001/api',
   
   // Save game to API
   saveGame: async (gameState, saveName) => {
     // This is a placeholder for future implementation
-    console.log('API saveGame called - would save to:', `${persistenceAPI.baseUrl}/${saveName}`);
+    console.log('API saveGame called - would save to:', `${persistenceAPI.baseUrl}/games/${saveName}`);
     
     // For now, just save to localStorage
     return saveGameToLocalStorage(gameState, saveName);
@@ -116,7 +116,7 @@ export const persistenceAPI = {
   // Load game from API
   loadGame: async (saveName) => {
     // This is a placeholder for future implementation
-    console.log('API loadGame called - would load from:', `${persistenceAPI.baseUrl}/${saveName}`);
+    console.log('API loadGame called - would load from:', `${persistenceAPI.baseUrl}/games/${saveName}`);
     
     // For now, just load from localStorage
     return loadGameFromLocalStorage(saveName);
@@ -125,7 +125,7 @@ export const persistenceAPI = {
   // Get list of saved games from API
   getSavedGames: async () => {
     // This is a placeholder for future implementation
-    console.log('API getSavedGames called - would fetch from:', persistenceAPI.baseUrl);
+    console.log('API getSavedGames called - would fetch from:', `${persistenceAPI.baseUrl}/games`);
     
     // For now, just get from localStorage
     return getAllSavedGames();
@@ -134,77 +134,86 @@ export const persistenceAPI = {
   // Delete saved game from API
   deleteSavedGame: async (saveName) => {
     // This is a placeholder for future implementation
-    console.log('API deleteSavedGame called - would delete from:', `${persistenceAPI.baseUrl}/${saveName}`);
+    console.log('API deleteSavedGame called - would delete from:', `${persistenceAPI.baseUrl}/games/${saveName}`);
     
     // For now, just delete from localStorage
     return deleteSavedGame(saveName);
   },
   
-  // Get available predefined scenarios
+  // Get available scenarios
   getScenarios: async () => {
-    // Return predefined scenarios from constants
-    return { success: true, scenarios: getAvailableScenarios() };
+    try {
+      // Use the actual API endpoint to get scenarios
+      const response = await fetch(`${persistenceAPI.baseUrl}/scenarios`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch scenarios: ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching scenarios:', error);
+      
+      // Fallback to local scenarios if API fails
+      return { success: true, scenarios: getAvailableScenarios() };
+    }
   },
   
   // Load a specific scenario by ID
   loadScenario: async (scenarioId) => {
     try {
-      const scenario = getScenarioById(scenarioId);
-      if (!scenario) {
-        return { success: false, error: "Scenario not found" };
+      // Use the actual API endpoint to get a specific scenario
+      const response = await fetch(`${persistenceAPI.baseUrl}/scenarios/${scenarioId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch scenario ${scenarioId}: ${response.statusText}`);
       }
       
-      // Log the scenario data for debugging
-      console.log('Found scenario:', scenarioId, scenario);
-      
-      // Make sure gameState contains the board
-      if (!scenario.gameState || !scenario.gameState.board) {
-        console.error('Scenario missing board data:', scenario);
-        return { success: false, error: "Invalid scenario data: missing board" };
-      }
-      
-      // Make sure we remove the setupFunction from the gameState
-      // This was causing issues as the function doesn't get properly serialized
-      const gameState = { ...scenario.gameState };
-      delete gameState.setupFunction;
-      
-      // For debugging, log the board structure
-      console.log('Scenario board:', gameState.board);
-      
-      return { 
-        success: true, 
-        data: {
-          // Include the complete game state directly
-          gameState,
-          saveName: `scenario-${scenarioId}`,
-          timestamp: new Date().toISOString(),
-          isScenario: true
-        } 
-      };
+      return await response.json();
     } catch (error) {
-      console.error("Failed to load scenario:", error);
-      return { success: false, error: error.message };
+      console.error("Failed to load scenario from API:", error);
+      
+      // Fallback to local scenario if API fails
+      try {
+        const scenario = getScenarioById(scenarioId);
+        if (!scenario) {
+          return { success: false, error: "Scenario not found" };
+        }
+        
+        // Log the scenario data for debugging
+        console.log('Found local scenario:', scenarioId, scenario);
+        
+        // Make sure gameState contains the board
+        if (!scenario.gameState || !scenario.gameState.board) {
+          console.error('Scenario missing board data:', scenario);
+          return { success: false, error: "Invalid scenario data: missing board" };
+        }
+        
+        // Make sure we remove the setupFunction from the gameState
+        const gameState = { ...scenario.gameState };
+        delete gameState.setupFunction;
+        
+        return { 
+          success: true, 
+          data: {
+            gameState,
+            saveName: `scenario-${scenarioId}`,
+            timestamp: new Date().toISOString(),
+            isScenario: true
+          } 
+        };
+      } catch (error) {
+        console.error("Failed to load local scenario:", error);
+        return { success: false, error: error.message };
+      }
     }
   },
   
-  // Save a new scenario (in a real app, this would be server-side)
+  // Save a new scenario
   saveScenario: async (scenario) => {
     try {
-      // In a real implementation, this would be a server API request
-      // For now, we'll register it to our runtime scenarios
-      console.log('saveScenario called - would save scenario to a server database:', scenario);
-      
-      // Register the scenario with our runtime registry
-      registerScenario(scenario);
-      
-      // Simulate server response
-      return { 
-        success: true, 
-        message: 'Scenario saved successfully! (Please note: in this demo, scenarios are not permanently saved and will be available only until the page is reloaded.)'
-      };
-      
-      /* In a real implementation with a server, we'd do something like:
-      const response = await fetch('/api/scenarios', {
+      // Send the scenario to the server API
+      const response = await fetch(`${persistenceAPI.baseUrl}/scenarios`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -213,13 +222,54 @@ export const persistenceAPI = {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to save scenario to server');
+        throw new Error(`Failed to save scenario: ${response.statusText}`);
+      }
+      
+      // Get the server response
+      const result = await response.json();
+      
+      // Also register locally for immediate use
+      registerScenario(scenario);
+      
+      return { 
+        success: true, 
+        message: 'Scenario saved successfully! It is now available to all users.',
+        scenario: result.scenario
+      };
+    } catch (error) {
+      console.error('Error saving scenario:', error);
+      
+      // Fallback to local registration
+      try {
+        // Register the scenario with our runtime registry
+        registerScenario(scenario);
+        
+        return { 
+          success: true, 
+          message: 'Scenario saved locally but failed to save to server. It will only be available in this session.',
+          error: error.message
+        };
+      } catch (localError) {
+        return { success: false, error: localError.message };
+      }
+    }
+  },
+  
+  // Delete a scenario
+  deleteScenario: async (scenarioId) => {
+    try {
+      // Delete the scenario from the server API
+      const response = await fetch(`${persistenceAPI.baseUrl}/scenarios/${scenarioId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete scenario: ${response.statusText}`);
       }
       
       return await response.json();
-      */
     } catch (error) {
-      console.error('Error saving scenario:', error);
+      console.error('Error deleting scenario:', error);
       return { success: false, error: error.message };
     }
   }

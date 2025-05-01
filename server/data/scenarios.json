@@ -1,0 +1,365 @@
+{
+  "scenarios": [
+    {
+      "id": "caution",
+      "name": "Caution",
+      "description": "Caution enemy ahead",
+      "gameState": {
+        "board": [
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 1,
+              "value": 6,
+              "actions": 3
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 0,
+              "value": 6,
+              "actions": 3
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            },
+            {
+              "playerId": 3,
+              "value": 2,
+              "actions": 0
+            }
+          ]
+        ],
+        "currentPlayer": 3,
+        "selectedPiece": null,
+        "validMoves": [],
+        "actions": 0,
+        "gameState": "NOT_STARTED",
+        "showTurnMessage": false,
+        "winner": null,
+        "numPlayers": 4,
+        "turnHistory": [
+          {
+            "type": "customMap",
+            "createdAt": "2025-05-01T19:38:35.186Z"
+          }
+        ]
+      },
+      "createdAt": "2025-05-01T19:38:35.186Z",
+      "timestamp": "2025-05-01T19:38:35.224Z"
+    }
+  ]
+}
