@@ -163,14 +163,19 @@ export const persistenceAPI = {
         return { success: false, error: "Invalid scenario data: missing board" };
       }
       
+      // Make sure we remove the setupFunction from the gameState
+      // This was causing issues as the function doesn't get properly serialized
+      const gameState = { ...scenario.gameState };
+      delete gameState.setupFunction;
+      
       // For debugging, log the board structure
-      console.log('Scenario board:', scenario.gameState.board);
+      console.log('Scenario board:', gameState.board);
       
       return { 
         success: true, 
         data: {
           // Include the complete game state directly
-          gameState: scenario.gameState,
+          gameState,
           saveName: `scenario-${scenarioId}`,
           timestamp: new Date().toISOString(),
           isScenario: true

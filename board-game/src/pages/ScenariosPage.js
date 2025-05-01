@@ -67,8 +67,8 @@ const ScenariosPage = () => {
         // Direct approach: load game state from the scenario into Redux
         dispatch(loadGameState(result.data.gameState));
         
-        // Navigate to the game page
-        navigate('/game');
+        // Navigate to the game page WITH the fromLoad state flag set to true
+        navigate('/game', { state: { fromLoad: true } });
       } else {
         const errorMessage = result.error || 'Failed to load scenario';
         console.error('Error in scenario data:', errorMessage);
