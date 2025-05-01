@@ -14,7 +14,22 @@ export const serializeGameState = (gameState) => {
 // Helper to deserialize stored game state
 export const deserializeGameState = (serializedState) => {
   try {
-    return JSON.parse(serializedState);
+    const parsed = JSON.parse(serializedState);
+    
+    // Clean up redundant 'actions' property in cells if it exists
+    if (parsed.gameState && parsed.gameState.board) {
+      parsed.gameState.board = parsed.gameState.board.map(row => 
+        row.map(cell => {
+          if (cell && cell.hasOwnProperty('actions')) {
+            const { actions, ...cellWithoutActions } = cell;
+            return cellWithoutActions;
+          }
+          return cell;
+        })
+      );
+    }
+    
+    return parsed;
   } catch (error) {
     console.error("Failed to parse saved game:", error);
     return null;

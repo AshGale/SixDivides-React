@@ -114,15 +114,47 @@ export const processCombat = (board, attackerRow, attackerCol, defenderRow, defe
     return board;
   }
 
-  // Simple combat logic: highest value wins, loser is removed.
-  // Ties: Attacker wins (removes defender)
-  if (attacker.value >= defender.value) {
-    newBoard[defenderRow][defenderCol] = null; // Defender removed
-    // Move attacker to defender's cell
-    newBoard[defenderRow][defenderCol] = attacker;
+  // Special handling for bases (value 6)
+  if (defender.value === 6) {
+    // Bases are damaged by the attacker's value
+    const newBaseValue = Math.max(1, defender.value - attacker.value);
+    
+    // Update the base with reduced value
+    newBoard[defenderRow][defenderCol] = {
+      ...defender,
+      value: newBaseValue
+    };
+    
+    // Remove the attacker after attacking the base
     newBoard[attackerRow][attackerCol] = null;
+    return newBoard;
+  }
+
+  // Combat logic: highest value wins, but attacker value is reduced by defender value
+  if (attacker.value > defender.value) {
+    // Calculate the new attacker value after combat
+    const newAttackerValue = attacker.value - defender.value;
+    
+    // If attacker value would be reduced to 0 or less, attacker is eliminated
+    if (newAttackerValue <= 0) {
+      newBoard[attackerRow][attackerCol] = null;
+    } else {
+      // Move attacker to defender's cell with reduced value
+      newBoard[defenderRow][defenderCol] = { 
+        ...attacker, 
+        value: newAttackerValue 
+      };
+      
+      // Remove attacker from original position
+      newBoard[attackerRow][attackerCol] = null;
+    }
+  } else if (attacker.value === defender.value) {
+    // If values are equal, both units are destroyed
+    newBoard[attackerRow][attackerCol] = null;
+    newBoard[defenderRow][defenderCol] = null;
   } else {
-    newBoard[attackerRow][attackerCol] = null; // Attacker removed
+    // If defender wins, attacker is removed
+    newBoard[attackerRow][attackerCol] = null;
   }
   
   return newBoard;

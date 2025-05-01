@@ -64,8 +64,7 @@ const MapEditorPage = () => {
     else {
       newBoard[row][col] = {
         playerId: selectedPlayer, 
-        value: selectedDiceValue,
-        actions: UNIT_TYPES[selectedDiceValue].actions
+        value: selectedDiceValue
       };
     }
     
@@ -190,8 +189,10 @@ const MapEditorPage = () => {
             cell.value = 1; 
           }
           
-          // Ensure actions is set correctly
-          cell.actions = UNIT_TYPES[cell.value].actions;
+          // Remove redundant actions property if it exists
+          if (cell.hasOwnProperty('actions')) {
+            delete cell.actions;
+          }
         }
       }
     }
