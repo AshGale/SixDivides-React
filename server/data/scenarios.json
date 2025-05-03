@@ -296,6 +296,243 @@
       },
       "createdAt": "2025-05-01T21:35:01.090Z",
       "timestamp": "2025-05-01T21:35:01.136Z"
+    },
+    {
+      "id": "gameplay-test",
+      "name": "Gameplay Test Scenario",
+      "description": "A comprehensive scenario to test all gameplay mechanics including movement, combining, combat, and base actions",
+      "gameState": {
+        "board": [
+          [
+            {
+              "playerId": 0,
+              "value": 6
+            },
+            {
+              "playerId": 0,
+              "value": 1
+            },
+            {
+              "playerId": 0,
+              "value": 3
+            },
+            null,
+            null,
+            {
+              "playerId": 1,
+              "value": 3
+            },
+            {
+              "playerId": 1,
+              "value": 1
+            },
+            {
+              "playerId": 1,
+              "value": 6
+            }
+          ],
+          [
+            {
+              "playerId": 0,
+              "value": 1
+            },
+            {
+              "playerId": 0,
+              "value": 5
+            },
+            {
+              "playerId": 0,
+              "value": 2
+            },
+            null,
+            null,
+            {
+              "playerId": 1,
+              "value": 2
+            },
+            {
+              "playerId": 1,
+              "value": 5
+            },
+            {
+              "playerId": 1,
+              "value": 1
+            }
+          ],
+          [
+            {
+              "playerId": 0,
+              "value": 4
+            },
+            {
+              "playerId": 0,
+              "value": 1
+            },
+            {
+              "playerId": 0,
+              "value": 1
+            },
+            null,
+            null,
+            {
+              "playerId": 1,
+              "value": 1
+            },
+            {
+              "playerId": 1,
+              "value": 1
+            },
+            {
+              "playerId": 1,
+              "value": 4
+            }
+          ],
+          [
+            null,
+            null,
+            {
+              "playerId": 0,
+              "value": 3
+            },
+            {
+              "playerId": 0,
+              "value": 2
+            },
+            {
+              "playerId": 1,
+              "value": 2
+            },
+            {
+              "playerId": 1,
+              "value": 3
+            },
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            {
+              "playerId": 3,
+              "value": 3
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 2,
+              "value": 2
+            },
+            {
+              "playerId": 2,
+              "value": 3
+            },
+            null,
+            null
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 4
+            },
+            {
+              "playerId": 3,
+              "value": 1
+            },
+            {
+              "playerId": 3,
+              "value": 1
+            },
+            null,
+            null,
+            {
+              "playerId": 2,
+              "value": 1
+            },
+            {
+              "playerId": 2,
+              "value": 1
+            },
+            {
+              "playerId": 2,
+              "value": 4
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 1
+            },
+            {
+              "playerId": 3,
+              "value": 5
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            null,
+            null,
+            {
+              "playerId": 2,
+              "value": 2
+            },
+            {
+              "playerId": 2,
+              "value": 5
+            },
+            {
+              "playerId": 2,
+              "value": 1
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 6
+            },
+            {
+              "playerId": 3,
+              "value": 1
+            },
+            {
+              "playerId": 3,
+              "value": 3
+            },
+            null,
+            null,
+            {
+              "playerId": 2,
+              "value": 3
+            },
+            {
+              "playerId": 2,
+              "value": 1
+            },
+            {
+              "playerId": 2,
+              "value": 6
+            }
+          ]
+        ],
+        "currentPlayer": 0,
+        "selectedPiece": null,
+        "validMoves": [],
+        "actions": 0,
+        "gameState": "NOT_STARTED",
+        "showTurnMessage": false,
+        "winner": null,
+        "numPlayers": 4,
+        "turnHistory": [
+          {
+            "type": "customMap",
+            "createdAt": "2025-05-03T13:30:00.000Z"
+          }
+        ]
+      },
+      "createdAt": "2025-05-03T13:30:00.000Z",
+      "timestamp": "2025-05-03T13:30:00.000Z"
     }
   ]
 }

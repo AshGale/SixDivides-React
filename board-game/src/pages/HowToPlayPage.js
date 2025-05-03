@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HowToPlayPage.css';
+import TestAutomationPanel from '../components/TestAutomationPanel';
 
 /**
  * How to Play page component
@@ -70,6 +71,19 @@ const HowToPlayPage = () => {
           <p>
             The last player with units remaining on the board wins the game.
           </p>
+        </div>
+        
+        <div className="row mt-4">
+          <div className="col-12">
+            <div className="card">
+              <div className="card-header bg-dark text-white">
+                <h3>Developer Testing Tools</h3>
+              </div>
+              <div className="card-body">
+                <TestAutomationPanel />
+              </div>
+            </div>
+          </div>
         </div>
         
         <button className="back-button" onClick={() => navigate('/')}>

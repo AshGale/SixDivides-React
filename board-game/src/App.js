@@ -11,6 +11,11 @@ import ScenariosPage from './pages/ScenariosPage';
 import Notification from './components/ui/Notification';
 import './App.css';
 
+// Expose store globally for testing purposes
+if (process.env.NODE_ENV !== 'production') {
+  window.reduxStore = store;
+}
+
 function App() {
   return (
     <Provider store={store}>
