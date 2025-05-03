@@ -86,17 +86,27 @@ export const processCombine = (board, fromRow, fromCol, toRow, toCol) => {
     return board;
   }
 
-  // Calculate combined value, capped at 6
-  let combinedValue = sourcePiece.value + targetPiece.value;
-  if (combinedValue > 6) {
-    combinedValue = 6;
-  }
+  // Calculate combined value
+  const totalValue = sourcePiece.value + targetPiece.value;
   
+  // Set target tile to max of 6
   newBoard[toRow][toCol] = { 
     playerId: sourcePiece.playerId, 
-    value: combinedValue
+    value: Math.min(6, totalValue)
   };
-  newBoard[fromRow][fromCol] = null;
+  
+  // If combined value exceeds 6, leave remainder in original position
+  if (totalValue > 6) {
+    const remainderValue = totalValue - 6;
+    newBoard[fromRow][fromCol] = {
+      playerId: sourcePiece.playerId,
+      value: remainderValue
+    };
+  } else {
+    // If no remainder, clear the source position
+    newBoard[fromRow][fromCol] = null;
+  }
+  
   return newBoard;
 };
 
@@ -153,8 +163,17 @@ export const processCombat = (board, attackerRow, attackerCol, defenderRow, defe
     newBoard[attackerRow][attackerCol] = null;
     newBoard[defenderRow][defenderCol] = null;
   } else {
-    // If defender wins, attacker is removed
+    // If defender wins, attacker is removed but defender's value is reduced by attacker's value
     newBoard[attackerRow][attackerCol] = null;
+    
+    // Calculate the new defender value after combat
+    const newDefenderValue = defender.value - attacker.value;
+    
+    // Update defender with reduced value
+    newBoard[defenderRow][defenderCol] = {
+      ...defender,
+      value: newDefenderValue
+    };
   }
   
   return newBoard;
