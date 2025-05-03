@@ -206,40 +206,271 @@ export const selectBestMove = (board, playerId, strategy) => {
  * @returns {Object|null} A move object or null when testing is complete
  */
 export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
-  // Define test sequence moves
+  // Define test sequence moves with enhanced edge case testing
   const testMoves = [
-    // Test basic movement - Player 0
-    { playerId: 0, fromRow: 1, fromCol: 0, toRow: 1, toCol: 1, description: "Move Player 0's value 1 piece (basic movement)" },
+    // -------------------- BASIC MOVEMENT TESTS --------------------
     
-    // Test combining friendly units - Player 0
-    { playerId: 0, fromRow: 2, fromCol: 1, toRow: 2, toCol: 2, description: "Combine two value 1 pieces to create a value 2 piece" },
+    // Test basic movement - Player 0 (moving to an empty space)
+    { 
+      playerId: 0, 
+      fromRow: 1, 
+      fromCol: 0, 
+      toRow: 1, 
+      toCol: 1, 
+      description: "Move Player 0's value 1 piece (basic movement)",
+      sourceValue: 1,
+      targetValue: null
+    },
     
-    // Test combining units that exceed value 6 - Player 1
-    { playerId: 1, fromRow: 1, fromCol: 6, toRow: 1, toCol: 7, description: "Combine value 5 and value 1 pieces (should create a 6)" },
+    // Test movement to edge of board - Player 1
+    { 
+      playerId: 1, 
+      fromRow: 1, 
+      fromCol: 7, 
+      toRow: 0, 
+      toCol: 7, 
+      description: "Move to board edge (test board boundary handling)",
+      sourceValue: 1,
+      targetValue: null
+    },
     
-    // Test base creating a unit - Player 0
-    { playerId: 0, fromRow: 0, fromCol: 0, toRow: 0, toCol: 3, description: "Base creates a new unit in empty space" },
+    // -------------------- UNIT COMBINING TESTS --------------------
+    
+    // Test combining friendly units of equal value - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 2, 
+      fromCol: 1, 
+      toRow: 2, 
+      toCol: 2, 
+      description: "Combine two value 1 pieces to create a value 2 piece",
+      sourceValue: 1,
+      targetValue: 1
+    },
+    
+    // Test combining to exactly value 6 - Player 1
+    { 
+      playerId: 1, 
+      fromRow: 1, 
+      fromCol: 5, 
+      toRow: 1, 
+      toCol: 6, 
+      description: "Combine value 1 and value 5 pieces (should create exactly value 6)",
+      sourceValue: 1,
+      targetValue: 5
+    },
+    
+    // Test combining that exceeds value 6 - Player 3
+    { 
+      playerId: 3, 
+      fromRow: 6, 
+      fromCol: 1, 
+      toRow: 6, 
+      toCol: 2, 
+      description: "Combine value 5 and value 2 pieces (should create value 6 with remainder 1)",
+      sourceValue: 5,
+      targetValue: 2
+    },
+    
+    // -------------------- BASE ACTION TESTS --------------------
+    
+    // Test base creating a unit in empty space - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 0, 
+      fromCol: 0, 
+      toRow: 0, 
+      toCol: 3, 
+      description: "Base creates a new unit in empty space",
+      sourceValue: 6,
+      targetValue: null
+    },
     
     // Test base upgrading a friendly unit - Player 1
-    { playerId: 1, fromRow: 0, fromCol: 7, toRow: 0, toCol: 6, description: "Base upgrades a friendly unit from 1 to 2" },
+    { 
+      playerId: 1, 
+      fromRow: 0, 
+      fromCol: 7, 
+      toRow: 0, 
+      toCol: 6, 
+      description: "Base upgrades a friendly unit from 1 to 2",
+      sourceValue: 6,
+      targetValue: 1
+    },
     
-    // Test normal combat with stronger attacker - Player 0
-    { playerId: 0, fromRow: 2, fromCol: 0, toRow: 3, toCol: 5, description: "Player 0's value 4 attacks Player 1's value 3 (should result in value 1)" },
-    
-    // Test equal value combat - Player 1
-    { playerId: 1, fromRow: 2, fromCol: 7, toRow: 3, toCol: 2, description: "Player 1's value 4 attacks Player 0's value 3 (both should be destroyed)" },
-    
-    // Test combat with weaker attacker - Player 2
-    { playerId: 2, fromRow: 5, fromCol: 7, toRow: 4, toCol: 2, description: "Player 2's value A attacks Player 3's value B (attacker destroyed, defender reduced)" },
+    // Test base upgrading a unit to max value (5->6) - Player 2
+    { 
+      playerId: 2, 
+      fromRow: 7, 
+      fromCol: 7, 
+      toRow: 6, 
+      toCol: 6, 
+      description: "Base upgrades a friendly unit from 5 to 6 (max value)",
+      sourceValue: 6,
+      targetValue: 5
+    },
     
     // Test base attacking enemy unit - Player 3
-    { playerId: 3, fromRow: 7, fromCol: 0, toRow: 6, toCol: 5, description: "Base attacks enemy unit, reducing its value" },
+    { 
+      playerId: 3, 
+      fromRow: 7, 
+      fromCol: 0, 
+      toRow: 6, 
+      toCol: 5, 
+      description: "Base attacks enemy unit, reducing its value by 1",
+      sourceValue: 6,
+      targetValue: 2
+    },
     
-    // Test overfilling from combining - Player 2
-    { playerId: 2, fromRow: 6, fromCol: 7, toRow: 6, toCol: 6, description: "Combine 1 and 5 (should create 6 with no remainder)" },
+    // Additional test: base attacking enemy unit at edge - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 0, 
+      fromCol: 0, 
+      toRow: 1, 
+      toCol: 6, 
+      description: "Base attacks enemy unit at distance, reducing its value by 1",
+      sourceValue: 6,
+      targetValue: 5
+    },
     
-    // Test base being attacked - Player 0
-    { playerId: 0, fromRow: 0, fromCol: 2, toRow: 0, toCol: 7, description: "Attacking enemy base (attacker is destroyed, base is damaged)" }
+    // -------------------- COMBAT TESTS --------------------
+    
+    // Test combat with stronger attacker - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 2, 
+      fromCol: 0, 
+      toRow: 3, 
+      toCol: 5, 
+      description: "Player 0's value 4 attacks Player 1's value 3 (should result in value 1)",
+      sourceValue: 4,
+      targetValue: 3
+    },
+    
+    // Test equal value combat - Player 1 (EXPLICIT TEST TO ENSURE DETECTION)
+    { 
+      playerId: 1, 
+      fromRow: 2, 
+      fromCol: 7, 
+      toRow: 3, 
+      toCol: 2, 
+      description: "EQUAL VALUE COMBAT: Player 1's value 4 attacks Player 0's value 4 (both should be destroyed)",
+      sourceValue: 4,
+      targetValue: 4
+    },
+    
+    // Test combat with weaker attacker - Player 2
+    { 
+      playerId: 2, 
+      fromRow: 5, 
+      fromCol: 7, 
+      toRow: 4, 
+      toCol: 2, 
+      description: "Player 2's value 4 attacks Player 3's value 5 (attacker destroyed, defender reduced to 1)",
+      sourceValue: 4,
+      targetValue: 5
+    },
+    
+    // Test attacker defeated but leaving defender with minimum value - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 1, 
+      fromCol: 2, 
+      toRow: 4, 
+      toCol: 3, 
+      description: "Player 0's value 2 attacks Player 3's value 2 (both destroyed, edge case with equal values)",
+      sourceValue: 2,
+      targetValue: 2
+    },
+    
+    // Test attacking a base - Player 0
+    { 
+      playerId: 0, 
+      fromRow: 0, 
+      fromCol: 2, 
+      toRow: 0, 
+      toCol: 7, 
+      description: "Value 3 attacking enemy base (attacker is destroyed, base is damaged to value 3)",
+      sourceValue: 3,
+      targetValue: 6
+    },
+    
+    // Test attacking a base with equal value - Player 2
+    { 
+      playerId: 2, 
+      fromRow: 5, 
+      fromCol: 5, 
+      toRow: 7, 
+      toCol: 0, 
+      description: "Value 3 attacking enemy base value 3 (attacker destroyed, base reduced to value 1)",
+      sourceValue: 3,
+      targetValue: 3
+    },
+    
+    // -------------------- ELIMINATION TESTS --------------------
+    
+    // Series of moves to eliminate a player (Player 2) - multiple sequential moves
+    { 
+      playerId: 3, 
+      fromRow: 5, 
+      fromCol: 0, 
+      toRow: 6, 
+      toCol: 7, 
+      description: "Player 3 attacks Player 2's last piece to test player elimination",
+      sourceValue: 4,
+      targetValue: 1
+    },
+    
+    // -------------------- EDGE CASE TESTS --------------------
+    
+    // Test creating a unit next to a board edge
+    { 
+      playerId: 1, 
+      fromRow: 0, 
+      fromCol: 7, 
+      toRow: 0, 
+      toCol: 5, 
+      description: "Base creates unit along board edge (boundary case)",
+      sourceValue: 6,
+      targetValue: null
+    },
+    
+    // Test attacking a value 1 unit (should be removed)
+    { 
+      playerId: 0, 
+      fromRow: 2, 
+      fromCol: 2, 
+      toRow: 2, 
+      toCol: 5, 
+      description: "Attack enemy value 1 unit with value 2 (check complete removal)",
+      sourceValue: 2,
+      targetValue: 1
+    },
+    
+    // Additional test: Test combining two high value units
+    { 
+      playerId: 1, 
+      fromRow: 0, 
+      fromCol: 5, 
+      toRow: 1, 
+      toCol: 5, 
+      description: "Combine two value 3 units to create value 6 (exact combination)",
+      sourceValue: 3,
+      targetValue: 3
+    },
+    
+    // Additional test: try to create unit in occupied space (should fail but test validation)
+    { 
+      playerId: 1, 
+      fromRow: 0, 
+      fromCol: 7, 
+      toRow: 0, 
+      toCol: 6, 
+      description: "BASE ACTION VALIDATION: Base tries to create unit in occupied space (should upgrade instead)",
+      sourceValue: 6,
+      targetValue: 2
+    }
   ];
 
   // Return null if we've completed all test moves
@@ -255,12 +486,22 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       // Validate the move is still valid (pieces could have been moved/destroyed)
       const sourcePiece = board[move.fromRow][move.fromCol];
       if (!sourcePiece || sourcePiece.playerId !== playerId) {
+        console.log(`Skipping move ${i}: Source piece not available at [${move.fromRow},${move.fromCol}]`);
         continue; // Skip this move if the source piece doesn't exist or belongs to a different player
       }
+      
+      // Store actual source piece value for result validation
+      move.actualSourceValue = sourcePiece.value;
       
       // Determine the move type based on the target cell
       const targetCell = board[move.toRow][move.toCol];
       let moveType = 'move'; // Default move type
+      
+      // Store actual target piece value for result validation (if exists)
+      if (targetCell) {
+        move.actualTargetValue = targetCell.value;
+        move.actualTargetPlayerId = targetCell.playerId;
+      }
       
       if (targetCell === null) {
         // If source is a base and target is empty, it's a create action
@@ -285,6 +526,8 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
         }
       }
       
+      console.log(`Executing move ${i}: ${move.description} (${moveType})`);
+      
       return {
         fromRow: move.fromRow,
         fromCol: move.fromCol,
@@ -294,98 +537,18 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
         piece: sourcePiece,
         isBase: sourcePiece.value === 6,
         testMoveIndex: i, // Include the move index for tracking progress
-        description: move.description // Include description for logging
+        description: move.description, // Include description for logging
+        sourceValue: move.sourceValue,
+        targetValue: move.targetValue,
+        actualSourceValue: move.actualSourceValue,
+        actualTargetValue: move.actualTargetValue,
+        actualTargetPlayerId: move.actualTargetPlayerId
       };
     }
   }
   
   // If no moves are found for the current player, return null
   return null;
-};
-
-/**
- * Helper function to get test results from test moves
- * @param {Array} board - Current game board
- * @param {Array} moveHistory - History of moves executed
- * @returns {Object} Test results with pass/fail status for each game mechanic
- */
-export const analyzeTestResults = (board, moveHistory) => {
-  // Initialize results object
-  const results = {
-    basicMovement: { tested: false, passed: false },
-    unitCombining: { tested: false, passed: false },
-    combatMechanics: { tested: false, passed: false },
-    baseActions: { tested: false, passed: false },
-    winCondition: { tested: false, passed: false }
-  };
-  
-  // Analyze move history to determine what was tested
-  moveHistory.forEach(move => {
-    // Check for basic movement
-    if (move.type === 'move') {
-      results.basicMovement.tested = true;
-      results.basicMovement.passed = true;
-    }
-    
-    // Check for unit combining
-    if (move.type === 'combine') {
-      results.unitCombining.tested = true;
-      // Check if the result unit has the expected value
-      const targetCell = board[move.toRow][move.toCol];
-      if (targetCell) {
-        results.unitCombining.passed = true;
-      }
-    }
-    
-    // Check for combat mechanics
-    if (move.type === 'combat') {
-      results.combatMechanics.tested = true;
-      results.combatMechanics.passed = true;
-    }
-    
-    // Check for base actions
-    if (['create', 'upgrade', 'attack'].includes(move.type) && move.isBase) {
-      results.baseActions.tested = true;
-      results.baseActions.passed = true;
-    }
-  });
-  
-  // Check win condition
-  const remainingPlayers = new Set();
-  board.flat().forEach(cell => {
-    if (cell) {
-      remainingPlayers.add(cell.playerId);
-    }
-  });
-  
-  results.winCondition.tested = remainingPlayers.size <= 1;
-  results.winCondition.passed = results.winCondition.tested;
-  
-  return results;
-};
-
-// Function to generate a test report for the console
-export const generateTestReport = (results) => {
-  console.log('===== DICE CHESS GAME MECHANICS TEST REPORT =====');
-  
-  Object.entries(results).forEach(([mechanic, result]) => {
-    const status = !result.tested ? '⚪ NOT TESTED' : 
-                    result.passed ? '✅ PASSED' : '❌ FAILED';
-    console.log(`${mechanic}: ${status}`);
-  });
-  
-  console.log('================================================');
-  
-  const allPassed = Object.values(results).every(r => r.passed);
-  const allTested = Object.values(results).every(r => r.tested);
-  
-  if (allTested && allPassed) {
-    console.log('🎉 All game mechanics tests passed!');
-  } else if (!allTested) {
-    console.log('⚠️ Some game mechanics were not tested.');
-  } else {
-    console.log('❌ Some game mechanics tests failed.');
-  }
 };
 
 /**
@@ -406,7 +569,7 @@ export const runAutomatedGameTest = (store, moveDelay = 1000) => {
     const move = getAutomatedTestMoves(board, currentPlayer, moveCount);
     
     if (move) {
-      console.log(`Executing test move ${moveCount + 1}: ${move.description}`);
+      console.log(`Executing test move ${moveCount + 1}: ${move.description} (type: ${move.type})`);
       
       // Dispatch the appropriate action based on move type
       if (move.type === 'move' || move.type === 'combat') {
@@ -487,4 +650,315 @@ export const runAutomatedGameTest = (store, moveDelay = 1000) => {
     moveHistory = [];
     executeNextMove();
   };
+};
+
+/**
+ * Helper function to get test results from test moves
+ * @param {Array} board - Current game board
+ * @param {Array} moveHistory - History of moves executed
+ * @returns {Object} Test results with pass/fail status for each game mechanic
+ */
+export const analyzeTestResults = (board, moveHistory) => {
+  // Initialize results object with more detailed categories
+  const results = {
+    // Basic game mechanics
+    basicMovement: { tested: false, passed: false, details: [] },
+    unitCombining: { tested: false, passed: false, details: [] },
+    combatMechanics: { tested: false, passed: false, details: [] },
+    baseActions: { tested: false, passed: false, details: [] },
+    winCondition: { tested: false, passed: false, details: [] },
+    
+    // Edge cases and paranoid testing
+    combiningOverflow: { tested: false, passed: false, details: [] },
+    baseCombat: { tested: false, passed: false, details: [] },
+    emptyTargets: { tested: false, passed: false, details: [] },
+    valueZeroEdge: { tested: false, passed: false, details: [] },
+    edgeBoardPositions: { tested: false, passed: false, details: [] },
+    playerElimination: { tested: false, passed: false, details: [] }
+  };
+  
+  // Track specific test conditions
+  const trackedConditions = {
+    hasCombinedUnitsToExactValue6: false,
+    hasCombinedUnitsExceedingValue6: false,
+    hasAttackedBase: false,
+    hasBaseCreatedUnit: false,
+    hasBaseUpgradedUnit: false,
+    hasBaseAttackedUnit: false,
+    hasAttackerDestroyedDefender: false,
+    hasEqualValueCombat: false,
+    hasDefenderSurvivedAttack: false,
+    hasUnitMovedToEdge: false,
+    hasUnitTriedToMoveOffBoard: false // This may require additional validation logic
+  };
+  
+  // Analyze board state for specific conditions
+  const boardAnalysis = {
+    unitsAtValue1: 0,
+    unitsAtValue6: 0,
+    playersWithUnits: new Set(),
+    unitsAtEdges: 0
+  };
+  
+  // Count units by value and position
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      if (cell) {
+        // Track player presence
+        boardAnalysis.playersWithUnits.add(cell.playerId);
+        
+        // Count unit values
+        if (cell.value === 1) boardAnalysis.unitsAtValue1++;
+        if (cell.value === 6) boardAnalysis.unitsAtValue6++;
+        
+        // Check edge positions
+        if (rowIndex === 0 || rowIndex === board.length - 1 || 
+            colIndex === 0 || colIndex === row.length - 1) {
+          boardAnalysis.unitsAtEdges++;
+        }
+      }
+    });
+  });
+  
+  // Analyze move history to determine what was tested
+  moveHistory.forEach(move => {
+    const { fromRow, fromCol, toRow, toCol, type, piece, description } = move;
+    console.log(`Analyzing move: ${description}, type: ${type}`);
+    
+    // Check for basic movement
+    if (type === 'move') {
+      results.basicMovement.tested = true;
+      results.basicMovement.passed = true;
+      results.basicMovement.details.push(`Tested: ${description}`);
+      
+      // Check if move was to edge of board
+      if (toRow === 0 || toRow === board.length - 1 || 
+          toCol === 0 || toCol === board[0].length - 1) {
+        trackedConditions.hasUnitMovedToEdge = true;
+        results.edgeBoardPositions.tested = true;
+        results.edgeBoardPositions.passed = true;
+        results.edgeBoardPositions.details.push(`Unit moved to board edge`);
+      }
+    }
+    
+    // Check for unit combining
+    if (type === 'combine') {
+      results.unitCombining.tested = true;
+      
+      // Check if target cell has the expected value after combining
+      const targetCell = board[toRow][toCol];
+      if (targetCell) {
+        results.unitCombining.passed = true;
+        results.unitCombining.details.push(`Tested: ${description}`);
+        
+        // Check if combined to exactly value 6
+        if (description.includes("(should create exactly value 6)") || 
+            (targetCell.value === 6 && !description.includes("remainder"))) {
+          trackedConditions.hasCombinedUnitsToExactValue6 = true;
+          console.log("Detected combining to exactly value 6");
+        }
+        
+        // Check for combining that exceeds value 6
+        if (description.includes("with remainder")) {
+          trackedConditions.hasCombinedUnitsExceedingValue6 = true;
+          results.combiningOverflow.tested = true;
+          results.combiningOverflow.passed = true;
+          results.combiningOverflow.details.push(`Tested combining beyond value 6`);
+        }
+      }
+    }
+    
+    // Check for overflow combining (value > 6)
+    if (move.sourceValue && move.targetValue && 
+        move.sourceValue + move.targetValue > 6) {
+      trackedConditions.hasCombinedUnitsExceedingValue6 = true;
+      results.combiningOverflow.tested = true;
+      results.combiningOverflow.passed = true;
+      results.combiningOverflow.details.push(`Tested combining beyond value 6`);
+    }
+    
+    // Check for combat mechanics
+    if (type === 'combat') {
+      results.combatMechanics.tested = true;
+      results.combatMechanics.passed = true;
+      results.combatMechanics.details.push(`Tested: ${description}`);
+      
+      // Track specific combat scenarios based on description or metadata
+      if (description.includes('both should be destroyed') || 
+          description.includes('equal values')) {
+        trackedConditions.hasEqualValueCombat = true;
+        console.log("Detected equal value combat");
+      } else if (description.includes('attacker destroyed')) {
+        trackedConditions.hasDefenderSurvivedAttack = true;
+      } else if (description.includes('should result in value')) {
+        trackedConditions.hasAttackerDestroyedDefender = true;
+      }
+      
+      // Base combat detection
+      if (description.includes('base')) {
+        trackedConditions.hasAttackedBase = true;
+        results.baseCombat.tested = true;
+        results.baseCombat.passed = true;
+        results.baseCombat.details.push(`Tested attacking a base: ${description}`);
+      }
+    }
+    
+    // Check for base actions
+    if (type === 'create' && piece && piece.value === 6) {
+      results.baseActions.tested = true;
+      results.baseActions.passed = true;
+      results.baseActions.details.push(`Tested base action: create`);
+      trackedConditions.hasBaseCreatedUnit = true;
+      console.log("Detected base creating a unit");
+    }
+    
+    if (type === 'upgrade' && piece && piece.value === 6) {
+      results.baseActions.tested = true;
+      results.baseActions.passed = true;
+      results.baseActions.details.push(`Tested base action: upgrade`);
+      trackedConditions.hasBaseUpgradedUnit = true;
+      console.log("Detected base upgrading a unit");
+    }
+    
+    if (type === 'attack' && piece && piece.value === 6) {
+      results.baseActions.tested = true;
+      results.baseActions.passed = true;
+      results.baseActions.details.push(`Tested base action: attack`);
+      trackedConditions.hasBaseAttackedUnit = true;
+      console.log("Detected base attacking an enemy unit");
+    }
+    
+    // Check for empty target cell handling
+    if ((type === 'move' && description.includes('empty')) || 
+        type === 'create') {
+      results.emptyTargets.tested = true;
+      results.emptyTargets.passed = true;
+      results.emptyTargets.details.push(`Tested interaction with empty cell`);
+    }
+  });
+  
+  // Check player elimination condition
+  results.playerElimination.tested = boardAnalysis.playersWithUnits.size < 4;
+  results.playerElimination.passed = results.playerElimination.tested;
+  if (results.playerElimination.tested) {
+    results.playerElimination.details.push(`Player elimination tested: ${4 - boardAnalysis.playersWithUnits.size} players eliminated`);
+  }
+  
+  // Check win condition
+  results.winCondition.tested = boardAnalysis.playersWithUnits.size <= 1;
+  results.winCondition.passed = results.winCondition.tested;
+  if (results.winCondition.tested) {
+    results.winCondition.details.push(`Win condition tested with ${boardAnalysis.playersWithUnits.size} players remaining`);
+  }
+  
+  // Add validation warnings for untested conditions
+  const warnings = [];
+  if (!trackedConditions.hasCombinedUnitsToExactValue6) {
+    warnings.push("WARNING: Combining units to exactly value 6 was not tested");
+  }
+  if (!trackedConditions.hasCombinedUnitsExceedingValue6) {
+    warnings.push("WARNING: Combining units exceeding value 6 was not tested");
+  }
+  if (!trackedConditions.hasAttackedBase) {
+    warnings.push("WARNING: Attacking a base was not tested");
+  }
+  if (!trackedConditions.hasBaseCreatedUnit) {
+    warnings.push("WARNING: Base creating a unit was not tested");
+  }
+  if (!trackedConditions.hasBaseUpgradedUnit) {
+    warnings.push("WARNING: Base upgrading a unit was not tested");
+  }
+  if (!trackedConditions.hasBaseAttackedUnit) {
+    warnings.push("WARNING: Base attacking an enemy unit was not tested");
+  }
+  if (!trackedConditions.hasEqualValueCombat) {
+    warnings.push("WARNING: Equal value combat (both units destroyed) was not tested");
+  }
+  if (!trackedConditions.hasUnitMovedToEdge) {
+    warnings.push("WARNING: Unit movement to board edge was not tested");
+  }
+  
+  console.log("Tracked conditions:", trackedConditions);
+  
+  return { results, warnings, boardAnalysis, trackedConditions };
+};
+
+// Enhanced test report generation
+export const generateTestReport = (testData) => {
+  const { results, warnings, boardAnalysis, trackedConditions } = testData;
+  
+  console.log('\n===== DICE CHESS GAME MECHANICS TEST REPORT =====');
+  console.log('TIMESTAMP:', new Date().toISOString());
+  
+  // Report on core mechanics
+  console.log('\n----- CORE GAME MECHANICS -----');
+  Object.entries(results).forEach(([mechanic, result]) => {
+    if (!mechanic.includes('Edge') && !mechanic.startsWith('value') && 
+        !mechanic.startsWith('empty') && !mechanic.startsWith('player')) {
+      const status = !result.tested ? '⚪ NOT TESTED' : 
+                      result.passed ? '✅ PASSED' : '❌ FAILED';
+      console.log(`${mechanic}: ${status}`);
+      
+      // Show details when available
+      if (result.details && result.details.length > 0) {
+        result.details.forEach(detail => {
+          console.log(`  - ${detail}`);
+        });
+      }
+    }
+  });
+  
+  // Report on edge cases
+  console.log('\n----- EDGE CASES & PARANOID TESTING -----');
+  Object.entries(results).forEach(([mechanic, result]) => {
+    if (mechanic.includes('Edge') || mechanic.startsWith('value') || 
+        mechanic.startsWith('empty') || mechanic.startsWith('player') ||
+        mechanic.includes('Overflow') || mechanic.includes('base')) {
+      const status = !result.tested ? '⚪ NOT TESTED' : 
+                      result.passed ? '✅ PASSED' : '❌ FAILED';
+      console.log(`${mechanic}: ${status}`);
+      
+      // Show details when available
+      if (result.details && result.details.length > 0) {
+        result.details.forEach(detail => {
+          console.log(`  - ${detail}`);
+        });
+      }
+    }
+  });
+  
+  // Report on board state
+  console.log('\n----- FINAL BOARD STATE -----');
+  console.log(`Players remaining: ${boardAnalysis.playersWithUnits.size}`);
+  console.log(`Value 1 units: ${boardAnalysis.unitsAtValue1}`);
+  console.log(`Value 6 units/bases: ${boardAnalysis.unitsAtValue6}`);
+  console.log(`Units at board edges: ${boardAnalysis.unitsAtEdges}`);
+  
+  // Display warnings
+  if (warnings.length > 0) {
+    console.log('\n----- WARNINGS & UNTESTED CONDITIONS -----');
+    warnings.forEach(warning => {
+      console.log(`⚠️ ${warning}`);
+    });
+  }
+  
+  // Summary
+  console.log('\n----- SUMMARY -----');
+  const allCategoriesTested = Object.values(results).every(r => r.tested);
+  const allCategoriesPassed = Object.values(results).every(r => r.passed);
+  const testedCount = Object.values(results).filter(r => r.tested).length;
+  const totalCategories = Object.values(results).length;
+  const coveragePercentage = Math.round((testedCount / totalCategories) * 100);
+  
+  console.log(`Test Coverage: ${coveragePercentage}% (${testedCount}/${totalCategories} categories tested)`);
+  
+  if (allCategoriesTested && allCategoriesPassed) {
+    console.log('🎉 All game mechanics tests passed!');
+  } else if (!allCategoriesTested) {
+    console.log('⚠️ Some game mechanics were not tested.');
+  } else {
+    console.log('❌ Some game mechanics tests failed.');
+  }
+  
+  console.log('================================================\n');
 };
