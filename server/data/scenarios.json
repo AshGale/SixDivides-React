@@ -1,0 +1,301 @@
+{
+  "scenarios": [
+    {
+      "id": "caution",
+      "name": "Caution",
+      "description": "Caution",
+      "gameState": {
+        "board": [
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 1,
+              "value": 6
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 0,
+              "value": 6
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ],
+          [
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            },
+            {
+              "playerId": 3,
+              "value": 2
+            }
+          ]
+        ],
+        "currentPlayer": 3,
+        "selectedPiece": null,
+        "validMoves": [],
+        "actions": 0,
+        "gameState": "NOT_STARTED",
+        "showTurnMessage": false,
+        "winner": null,
+        "numPlayers": 4,
+        "turnHistory": [
+          {
+            "type": "customMap",
+            "createdAt": "2025-05-01T21:35:01.090Z"
+          }
+        ]
+      },
+      "createdAt": "2025-05-01T21:35:01.090Z",
+      "timestamp": "2025-05-01T21:35:01.136Z"
+    }
+  ]
+}

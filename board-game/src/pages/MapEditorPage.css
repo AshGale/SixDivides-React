@@ -252,3 +252,38 @@
   font-size: 0.8rem;
   color: #777;
 }
+
+.map-description-input {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.map-description-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.scenario-option {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.scenario-option label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.scenario-option input[type="checkbox"] {
+  margin-right: 8px;
+}
