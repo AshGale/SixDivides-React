@@ -40,16 +40,18 @@ const HowToPlayPage = () => {
         <div className="rules-section">
           <h2>Combat System</h2>
           <ul>
-            <li><strong>Attacker {'>'}  Defender:</strong> Defender removed, attacker moves to the spot, value reduced by defender's value</li>
-            <li><strong>Attacker {'≤'} Defender:</strong> Attacker destroyed, defender reduced by attacker's value</li>
+            <li><strong>Attacker {'>'} Defender:</strong> Defender removed, attacker moves to the spot, value reduced by defender's value</li>
+            <li><strong>Attacker {'<'} Defender:</strong> Attacker destroyed, defender's value reduced by attacker's value</li>
+            <li><strong>Equal Values:</strong> Both units are destroyed</li>
           </ul>
         </div>
         
         <div className="rules-section">
           <h2>Unit Combining</h2>
           <ul>
-            <li><strong>Combined {'≤'} 6:</strong> Sum values, place on target tile</li>
-            <li><strong>Combined {'>'} 6:</strong> Target becomes base (6), original keeps remainder</li>
+            <li><strong>Combined {'≤'} 6:</strong> Sum values, place on target tile, source tile emptied</li>
+            <li><strong>Combined {'>'} 6:</strong> Target becomes value 6, source keeps remainder (combined value - 6)</li>
+            <li>Example: 4+4=8 will result in a 6 on target tile and a 2 on source tile</li>
             <li>Two value 6 units cannot combine</li>
           </ul>
         </div>
