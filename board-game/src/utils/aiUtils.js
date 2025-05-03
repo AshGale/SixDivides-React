@@ -1,5 +1,13 @@
+import { 
+  processMove,
+  processBaseAction,
+  checkWinCondition,
+} from '../logic/gameplayUtils';
 import { getValidMovesForPiece } from '../logic';
 import { UNIT_TYPES } from '../constants/gameConstants';
+
+// Console log to verify module is freshly loaded
+console.log(`aiUtils.js loaded at ${new Date().toISOString()} - using latest version`);
 
 /**
  * Get all possible moves for an AI player
@@ -217,6 +225,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 1, 
       toCol: 1, 
+      type: 'move',
       description: "Move Player 0's value 1 piece (basic movement)",
       sourceValue: 1,
       targetValue: null
@@ -229,6 +238,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 0, 
       toCol: 7, 
+      type: 'move',
       description: "Move to board edge (test board boundary handling)",
       sourceValue: 1,
       targetValue: null
@@ -243,6 +253,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 1, 
       toRow: 2, 
       toCol: 2, 
+      type: 'combine',
       description: "Combine two value 1 pieces to create a value 2 piece",
       sourceValue: 1,
       targetValue: 1
@@ -255,6 +266,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 5, 
       toRow: 1, 
       toCol: 6, 
+      type: 'combine',
       description: "Combine value 1 and value 5 pieces (should create exactly value 6)",
       sourceValue: 1,
       targetValue: 5
@@ -267,6 +279,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 1, 
       toRow: 6, 
       toCol: 2, 
+      type: 'combine',
       description: "Combine value 5 and value 2 pieces (should create value 6 with remainder 1)",
       sourceValue: 5,
       targetValue: 2
@@ -281,6 +294,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 0, 
       toCol: 3, 
+      type: 'create',
       description: "Base creates a new unit in empty space",
       sourceValue: 6,
       targetValue: null
@@ -293,6 +307,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 0, 
       toCol: 6, 
+      type: 'upgrade',
       description: "Base upgrades a friendly unit from 1 to 2",
       sourceValue: 6,
       targetValue: 1
@@ -305,6 +320,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 6, 
       toCol: 6, 
+      type: 'upgrade',
       description: "Base upgrades a friendly unit from 5 to 6 (max value)",
       sourceValue: 6,
       targetValue: 5
@@ -317,6 +333,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 6, 
       toCol: 5, 
+      type: 'attack',
       description: "Base attacks enemy unit, reducing its value by 1",
       sourceValue: 6,
       targetValue: 2
@@ -329,6 +346,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 1, 
       toCol: 6, 
+      type: 'attack',
       description: "Base attacks enemy unit at distance, reducing its value by 1",
       sourceValue: 6,
       targetValue: 5
@@ -343,6 +361,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 3, 
       toCol: 5, 
+      type: 'move',
       description: "Player 0's value 4 attacks Player 1's value 3 (should result in value 1)",
       sourceValue: 4,
       targetValue: 3
@@ -355,6 +374,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 3, 
       toCol: 2, 
+      type: 'move',
       description: "EQUAL VALUE COMBAT: Player 1's value 4 attacks Player 0's value 4 (both should be destroyed)",
       sourceValue: 4,
       targetValue: 4
@@ -367,6 +387,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 4, 
       toCol: 2, 
+      type: 'move',
       description: "Player 2's value 4 attacks Player 3's value 5 (attacker destroyed, defender reduced to 1)",
       sourceValue: 4,
       targetValue: 5
@@ -379,6 +400,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 2, 
       toRow: 4, 
       toCol: 3, 
+      type: 'move',
       description: "Player 0's value 2 attacks Player 3's value 2 (both destroyed, edge case with equal values)",
       sourceValue: 2,
       targetValue: 2
@@ -391,6 +413,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 2, 
       toRow: 0, 
       toCol: 7, 
+      type: 'move',
       description: "Value 3 attacking enemy base (attacker is destroyed, base is damaged to value 3)",
       sourceValue: 3,
       targetValue: 6
@@ -403,6 +426,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 5, 
       toRow: 7, 
       toCol: 0, 
+      type: 'move',
       description: "Value 3 attacking enemy base value 3 (attacker destroyed, base reduced to value 1)",
       sourceValue: 3,
       targetValue: 3
@@ -417,6 +441,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 0, 
       toRow: 6, 
       toCol: 7, 
+      type: 'move',
       description: "Player 3 attacks Player 2's last piece to test player elimination",
       sourceValue: 4,
       targetValue: 1
@@ -431,6 +456,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 0, 
       toCol: 5, 
+      type: 'create',
       description: "Base creates unit along board edge (boundary case)",
       sourceValue: 6,
       targetValue: null
@@ -443,6 +469,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 2, 
       toRow: 2, 
       toCol: 5, 
+      type: 'move',
       description: "Attack enemy value 1 unit with value 2 (check complete removal)",
       sourceValue: 2,
       targetValue: 1
@@ -455,6 +482,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 5, 
       toRow: 1, 
       toCol: 5, 
+      type: 'combine',
       description: "Combine two value 3 units to create value 6 (exact combination)",
       sourceValue: 3,
       targetValue: 3
@@ -467,6 +495,7 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
       fromCol: 7, 
       toRow: 0, 
       toCol: 6, 
+      type: 'create',
       description: "BASE ACTION VALIDATION: Base tries to create unit in occupied space (should upgrade instead)",
       sourceValue: 6,
       targetValue: 2
@@ -560,7 +589,197 @@ export const getAutomatedTestMoves = (board, playerId, moveCount = 0) => {
 export const runAutomatedGameTest = (store, moveDelay = 1000) => {
   let moveCount = 0;
   let moveHistory = [];
+  // Store board snapshots before and after moves for validation
+  let boardSnapshots = [];
   
+  console.log("Starting automated game mechanics test...");
+  
+  // Helper to create a deep copy of the board for snapshots
+  const copyBoard = (board) => {
+    return JSON.parse(JSON.stringify(board));
+  };
+  
+  // Function to validate board state changes
+  const validateMove = (move, beforeBoard, afterBoard) => {
+    const { fromRow, fromCol, toRow, toCol, type, 
+            sourceValue, targetValue, description } = move;
+            
+    // Debug: log the current board state for better troubleshooting
+    console.log(`Before move board state at [${fromRow},${fromCol}]:`, beforeBoard[fromRow][fromCol]);
+    console.log(`Before move board state at [${toRow},${toCol}]:`, beforeBoard[toRow][toCol]);
+    console.log(`After move board state at [${fromRow},${fromCol}]:`, afterBoard[fromRow][fromCol]);
+    console.log(`After move board state at [${toRow},${toCol}]:`, afterBoard[toRow][toCol]);
+    
+    // Capture actual results for validation
+    const actualResult = {
+      sourceRemoved: afterBoard[fromRow][fromCol] === null,
+      targetValue: afterBoard[toRow][toCol] ? afterBoard[toRow][toCol].value : null,
+      targetPlayerId: afterBoard[toRow][toCol] ? afterBoard[toRow][toCol].playerId : null
+    };
+    
+    // Add validation data to the move
+    move.validation = { 
+      valid: true,
+      errors: [],
+      beforeState: copyBoard(beforeBoard),
+      afterState: copyBoard(afterBoard),
+      actualResult
+    };
+    
+    console.log(`Validating ${type} move: ${description}`);
+    
+    // Skip validation for certain known edge cases
+    const skipValidation = 
+      // Skip validation if both source and target are null after move (indicates a failed move)
+      (afterBoard[fromRow][fromCol] === null && afterBoard[toRow][toCol] === null) ||
+      // Skip validation if board states are identical (no change occurred)
+      (JSON.stringify(beforeBoard) === JSON.stringify(afterBoard));
+      
+    if (skipValidation) {
+      console.warn(`⚠️ Skipping validation for move ${description} - no board changes detected`);
+      move.validation.valid = false;
+      move.validation.errors.push("Move did not result in any board changes");
+      return move;
+    }
+
+    // Validate based on move type
+    switch(type) {
+      case 'move':
+        // In a move, source should be removed and target should have source's value
+        if (!actualResult.sourceRemoved) {
+          move.validation.valid = false;
+          move.validation.errors.push("Source piece not removed after move");
+        }
+        if (actualResult.targetValue !== sourceValue) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Target value incorrect: expected ${sourceValue}, got ${actualResult.targetValue}`);
+        }
+        break;
+        
+      case 'combine':
+        // In a combine, we expect source + target values (up to max 6)
+        const expectedValue = Math.min(6, (sourceValue || 0) + (targetValue || 0));
+        const expectedRemainder = (sourceValue || 0) + (targetValue || 0) > 6 ? 
+                                 (sourceValue || 0) + (targetValue || 0) - 6 : null;
+                                 
+        // Debug the combination math
+        console.log(`COMBINE DEBUG: sourceValue=${sourceValue}, targetValue=${targetValue}`);
+        console.log(`COMBINE DEBUG: expectedValue=${expectedValue}, expectedRemainder=${expectedRemainder}`);
+        
+        if (expectedRemainder && afterBoard[fromRow][fromCol] === null) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Source should have remainder ${expectedRemainder} but was removed`);
+        } else if (expectedRemainder && 
+                 afterBoard[fromRow][fromCol] && 
+                 afterBoard[fromRow][fromCol].value !== expectedRemainder) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Source remainder incorrect: expected ${expectedRemainder}, got ${afterBoard[fromRow][fromCol].value}`);
+        } else if (!expectedRemainder && !actualResult.sourceRemoved) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Source piece should be removed when combine value <= 6`);
+        }
+        
+        // Handle the case where combine is actually a move (result is a changed board state)
+        if (actualResult.targetValue === null) {
+          // This might be a failed execution, check if board changed at all
+          const boardChanged = JSON.stringify(beforeBoard) !== JSON.stringify(afterBoard);
+          if (!boardChanged) {
+            move.validation.valid = false;
+            move.validation.errors.push("Combine action failed to execute");
+          }
+        } else if (actualResult.targetValue !== expectedValue) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Target value incorrect: expected ${expectedValue}, got ${actualResult.targetValue}`);
+        }
+        break;
+        
+      case 'combat':
+        // Combat logic depends on values
+        if (sourceValue > targetValue) {
+          // Attacker wins, source removed, target becomes attacker with reduced value
+          const expectedValue = sourceValue - targetValue;
+          if (!actualResult.sourceRemoved) {
+            move.validation.valid = false;
+            move.validation.errors.push("Attacker should be removed from original position");
+          }
+          if (actualResult.targetValue !== expectedValue && expectedValue > 0) {
+            move.validation.valid = false;
+            move.validation.errors.push(`Target value incorrect: expected ${expectedValue}, got ${actualResult.targetValue}`);
+          }
+        } else if (sourceValue === targetValue) {
+          // Equal values, both destroyed
+          if (!actualResult.sourceRemoved) {
+            move.validation.valid = false;
+            move.validation.errors.push("Source should be removed in equal value combat");
+          }
+          if (afterBoard[toRow][toCol] !== null) {
+            move.validation.valid = false;
+            move.validation.errors.push("Target should be removed in equal value combat");
+          }
+        } else {
+          // Attacker loses, removed, defender reduced
+          const expectedValue = targetValue - sourceValue;
+          if (!actualResult.sourceRemoved) {
+            move.validation.valid = false;
+            move.validation.errors.push("Attacker should be removed when losing combat");
+          }
+          if (actualResult.targetValue !== expectedValue && expectedValue > 0) {
+            move.validation.valid = false;
+            move.validation.errors.push(`Defender value incorrect: expected ${expectedValue}, got ${actualResult.targetValue}`);
+          }
+        }
+        break;
+        
+      case 'create':
+        // Base creating a unit - check if we got any unit at all
+        if (actualResult.targetValue === null) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Base failed to create a unit`);
+        } else if (actualResult.targetValue !== 1) {
+          // If a unit was created but not value 1, report the issue
+          move.validation.valid = false;
+          move.validation.errors.push(`Created unit should have value 1, got ${actualResult.targetValue}`);
+        }
+        break;
+        
+      case 'upgrade':
+        // Base upgrading - should increase by 1
+        const expectedUpgradeValue = Math.min(6, (targetValue || 0) + 1);
+        if (actualResult.targetValue !== expectedUpgradeValue) {
+          move.validation.valid = false;
+          move.validation.errors.push(`Upgraded value incorrect: expected ${expectedUpgradeValue}, got ${actualResult.targetValue}`);
+        }
+        break;
+        
+      case 'attack':
+        // Base attacking - should reduce by 1 or remove if at 1
+        if ((targetValue || 0) > 1) {
+          const expectedAttackValue = (targetValue || 0) - 1;
+          if (actualResult.targetValue !== expectedAttackValue) {
+            move.validation.valid = false;
+            move.validation.errors.push(`After attack value incorrect: expected ${expectedAttackValue}, got ${actualResult.targetValue}`);
+          }
+        } else {
+          // Value 1 units should be removed when attacked
+          if (afterBoard[toRow][toCol] !== null) {
+            move.validation.valid = false;
+            move.validation.errors.push(`Value 1 unit should be removed when attacked`);
+          }
+        }
+        break;
+    }
+    
+    // Log validation results
+    if (!move.validation.valid) {
+      console.error(`❌ VALIDATION FAILED for ${type} move: ${description}`);
+      move.validation.errors.forEach(error => console.error(`  - ${error}`));
+    } else {
+      console.log(`✅ Validated ${type} move: ${description}`);
+    }
+    
+    return move;
+  };
+
   const executeNextMove = () => {
     const state = store.getState().game;
     const { board, currentPlayer } = state;
@@ -571,72 +790,129 @@ export const runAutomatedGameTest = (store, moveDelay = 1000) => {
     if (move) {
       console.log(`Executing test move ${moveCount + 1}: ${move.description} (type: ${move.type})`);
       
-      // Dispatch the appropriate action based on move type
-      if (move.type === 'move' || move.type === 'combat') {
-        store.dispatch({
-          type: 'game/selectPiece',
-          payload: { row: move.fromRow, col: move.fromCol }
-        });
-        
-        setTimeout(() => {
+      // Print the current board state for debugging
+      console.log(`Current board state at move ${moveCount + 1}:`, 
+                 JSON.stringify(board[move.fromRow][move.fromCol]),
+                 JSON.stringify(board[move.toRow][move.toCol]));
+      
+      // Save board state before the move for validation
+      const beforeState = copyBoard(board);
+      
+      try {
+        // Dispatch the appropriate action based on move type
+        if (move.type === 'move' || move.type === 'combat') {
           store.dispatch({
-            type: 'game/executeMove',
-            payload: { row: move.toRow, col: move.toCol }
+            type: 'game/selectPiece',
+            payload: { row: move.fromRow, col: move.fromCol }
           });
           
-          // Add to move history
-          moveHistory.push(move);
-          moveCount++;
-          
-          // Schedule next move
-          setTimeout(executeNextMove, moveDelay);
-        }, 300); // Small delay between select and move
-      } 
-      else if (move.type === 'combine') {
-        store.dispatch({
-          type: 'game/selectPiece',
-          payload: { row: move.fromRow, col: move.fromCol }
-        });
-        
-        setTimeout(() => {
+          setTimeout(() => {
+            store.dispatch({
+              type: 'game/executeMove',
+              payload: { row: move.toRow, col: move.toCol }
+            });
+            
+            // Wait a bit for the state to update, then validate
+            setTimeout(() => {
+              try {
+                const afterState = copyBoard(store.getState().game.board);
+                console.log("Board state after move:");
+                console.log(`From [${move.fromRow},${move.fromCol}]:`, 
+                          afterState[move.fromRow][move.fromCol]);
+                console.log(`To [${move.toRow},${move.toCol}]:`, 
+                          afterState[move.toRow][move.toCol]);
+                          
+                const validatedMove = validateMove(move, beforeState, afterState);
+                
+                // Add to move history
+                moveHistory.push(validatedMove);
+                moveCount++;
+                
+                // Schedule next move
+                setTimeout(executeNextMove, moveDelay);
+              } catch (err) {
+                console.error("Error validating move:", err);
+                moveCount++;
+                setTimeout(executeNextMove, moveDelay);
+              }
+            }, 100);
+          }, 300); // Small delay between select and move
+        } 
+        else if (move.type === 'combine') {
           store.dispatch({
-            type: 'game/executeCombine',
-            payload: { row: move.toRow, col: move.toCol }
+            type: 'game/selectPiece',
+            payload: { row: move.fromRow, col: move.fromCol }
           });
           
-          // Add to move history
-          moveHistory.push(move);
-          moveCount++;
+          setTimeout(() => {
+            store.dispatch({
+              type: 'game/executeCombine',
+              payload: { row: move.toRow, col: move.toCol }
+            });
+            
+            // Wait a bit for the state to update, then validate
+            setTimeout(() => {
+              try {
+                const afterState = copyBoard(store.getState().game.board);
+                const validatedMove = validateMove(move, beforeState, afterState);
+                
+                // Add to move history
+                moveHistory.push(validatedMove);
+                moveCount++;
+                
+                // Schedule next move
+                setTimeout(executeNextMove, moveDelay);
+              } catch (err) {
+                console.error("Error validating combine:", err);
+                moveCount++;
+                setTimeout(executeNextMove, moveDelay);
+              }
+            }, 100);
+          }, 300);
+        }
+        else if (['create', 'upgrade', 'attack'].includes(move.type)) {
+          store.dispatch({
+            type: 'game/selectPiece',
+            payload: { row: move.fromRow, col: move.fromCol }
+          });
           
-          // Schedule next move
-          setTimeout(executeNextMove, moveDelay);
-        }, 300);
+          setTimeout(() => {
+            store.dispatch({
+              type: 'game/executeBaseAction',
+              payload: { 
+                row: move.toRow, 
+                col: move.toCol, 
+                actionType: move.type 
+              }
+            });
+            
+            // Wait a bit for the state to update, then validate
+            setTimeout(() => {
+              try {
+                const afterState = copyBoard(store.getState().game.board);
+                const validatedMove = validateMove(move, beforeState, afterState);
+                
+                // Add to move history
+                moveHistory.push(validatedMove);
+                moveCount++;
+                
+                // Schedule next move
+                setTimeout(executeNextMove, moveDelay);
+              } catch (err) {
+                console.error("Error validating base action:", err);
+                moveCount++;
+                setTimeout(executeNextMove, moveDelay);
+              }
+            }, 100);
+          }, 300);
+        }
+      } catch (err) {
+        console.error("Error executing move:", err);
+        moveCount++;
+        setTimeout(executeNextMove, moveDelay);
       }
-      else if (['create', 'upgrade', 'attack'].includes(move.type)) {
-        store.dispatch({
-          type: 'game/selectPiece',
-          payload: { row: move.fromRow, col: move.fromCol }
-        });
-        
-        setTimeout(() => {
-          store.dispatch({
-            type: 'game/executeBaseAction',
-            payload: { 
-              row: move.toRow, 
-              col: move.toCol, 
-              actionType: move.type 
-            }
-          });
-          
-          // Add to move history
-          moveHistory.push(move);
-          moveCount++;
-          
-          // Schedule next move
-          setTimeout(executeNextMove, moveDelay);
-        }, 300);
-      }
-    } else {
+    }
+    else {
       // Testing complete - generate report
       console.log("Automated test sequence complete!");
       const results = analyzeTestResults(board, moveHistory);
@@ -648,6 +924,7 @@ export const runAutomatedGameTest = (store, moveDelay = 1000) => {
     console.log("Starting automated game mechanics test...");
     moveCount = 0;
     moveHistory = [];
+    boardSnapshots = [];
     executeNextMove();
   };
 };
@@ -662,19 +939,19 @@ export const analyzeTestResults = (board, moveHistory) => {
   // Initialize results object with more detailed categories
   const results = {
     // Basic game mechanics
-    basicMovement: { tested: false, passed: false, details: [] },
-    unitCombining: { tested: false, passed: false, details: [] },
-    combatMechanics: { tested: false, passed: false, details: [] },
-    baseActions: { tested: false, passed: false, details: [] },
-    winCondition: { tested: false, passed: false, details: [] },
+    basicMovement: { tested: false, passed: false, details: [], validationErrors: [] },
+    unitCombining: { tested: false, passed: false, details: [], validationErrors: [] },
+    combatMechanics: { tested: false, passed: false, details: [], validationErrors: [] },
+    baseActions: { tested: false, passed: false, details: [], validationErrors: [] },
+    winCondition: { tested: false, passed: false, details: [], validationErrors: [] },
     
     // Edge cases and paranoid testing
-    combiningOverflow: { tested: false, passed: false, details: [] },
-    baseCombat: { tested: false, passed: false, details: [] },
-    emptyTargets: { tested: false, passed: false, details: [] },
-    valueZeroEdge: { tested: false, passed: false, details: [] },
-    edgeBoardPositions: { tested: false, passed: false, details: [] },
-    playerElimination: { tested: false, passed: false, details: [] }
+    combiningOverflow: { tested: false, passed: false, details: [], validationErrors: [] },
+    baseCombat: { tested: false, passed: false, details: [], validationErrors: [] },
+    emptyTargets: { tested: false, passed: false, details: [], validationErrors: [] },
+    valueZeroEdge: { tested: false, passed: false, details: [], validationErrors: [] },
+    edgeBoardPositions: { tested: false, passed: false, details: [], validationErrors: [] },
+    playerElimination: { tested: false, passed: false, details: [], validationErrors: [] }
   };
   
   // Track specific test conditions
@@ -691,6 +968,9 @@ export const analyzeTestResults = (board, moveHistory) => {
     hasUnitMovedToEdge: false,
     hasUnitTriedToMoveOffBoard: false // This may require additional validation logic
   };
+  
+  // Track validation failures
+  let validationFailures = 0;
   
   // Analyze board state for specific conditions
   const boardAnalysis = {
@@ -722,48 +1002,74 @@ export const analyzeTestResults = (board, moveHistory) => {
   
   // Analyze move history to determine what was tested
   moveHistory.forEach(move => {
-    const { fromRow, fromCol, toRow, toCol, type, piece, description } = move;
+    const { fromRow, fromCol, toRow, toCol, type, piece, description, validation } = move;
     console.log(`Analyzing move: ${description}, type: ${type}`);
+    
+    // Check if this move had validation errors
+    const hasValidationErrors = validation && !validation.valid;
+    if (hasValidationErrors) {
+      validationFailures++;
+    }
     
     // Check for basic movement
     if (type === 'move') {
       results.basicMovement.tested = true;
-      results.basicMovement.passed = true;
+      results.basicMovement.passed = !hasValidationErrors;
       results.basicMovement.details.push(`Tested: ${description}`);
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.basicMovement.validationErrors.push(`${description}: ${error}`);
+        });
+      }
       
       // Check if move was to edge of board
       if (toRow === 0 || toRow === board.length - 1 || 
           toCol === 0 || toCol === board[0].length - 1) {
         trackedConditions.hasUnitMovedToEdge = true;
         results.edgeBoardPositions.tested = true;
-        results.edgeBoardPositions.passed = true;
+        results.edgeBoardPositions.passed = !hasValidationErrors;
         results.edgeBoardPositions.details.push(`Unit moved to board edge`);
+        
+        if (hasValidationErrors) {
+          validation.errors.forEach(error => {
+            results.edgeBoardPositions.validationErrors.push(`${description}: ${error}`);
+          });
+        }
       }
     }
     
     // Check for unit combining
     if (type === 'combine') {
       results.unitCombining.tested = true;
+      results.unitCombining.passed = !hasValidationErrors;
+      results.unitCombining.details.push(`Tested: ${description}`);
       
-      // Check if target cell has the expected value after combining
-      const targetCell = board[toRow][toCol];
-      if (targetCell) {
-        results.unitCombining.passed = true;
-        results.unitCombining.details.push(`Tested: ${description}`);
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.unitCombining.validationErrors.push(`${description}: ${error}`);
+        });
+      }
+      
+      // Check if combined to exactly value 6
+      if (description.includes("(should create exactly value 6)") || 
+          (validation && validation.actualResult && validation.actualResult.targetValue === 6 && 
+           !description.includes("remainder"))) {
+        trackedConditions.hasCombinedUnitsToExactValue6 = true;
+        console.log("Detected combining to exactly value 6");
+      }
+      
+      // Check for combining that exceeds value 6
+      if (description.includes("with remainder")) {
+        trackedConditions.hasCombinedUnitsExceedingValue6 = true;
+        results.combiningOverflow.tested = true;
+        results.combiningOverflow.passed = !hasValidationErrors;
+        results.combiningOverflow.details.push(`Tested combining beyond value 6`);
         
-        // Check if combined to exactly value 6
-        if (description.includes("(should create exactly value 6)") || 
-            (targetCell.value === 6 && !description.includes("remainder"))) {
-          trackedConditions.hasCombinedUnitsToExactValue6 = true;
-          console.log("Detected combining to exactly value 6");
-        }
-        
-        // Check for combining that exceeds value 6
-        if (description.includes("with remainder")) {
-          trackedConditions.hasCombinedUnitsExceedingValue6 = true;
-          results.combiningOverflow.tested = true;
-          results.combiningOverflow.passed = true;
-          results.combiningOverflow.details.push(`Tested combining beyond value 6`);
+        if (hasValidationErrors) {
+          validation.errors.forEach(error => {
+            results.combiningOverflow.validationErrors.push(`${description}: ${error}`);
+          });
         }
       }
     }
@@ -773,19 +1079,32 @@ export const analyzeTestResults = (board, moveHistory) => {
         move.sourceValue + move.targetValue > 6) {
       trackedConditions.hasCombinedUnitsExceedingValue6 = true;
       results.combiningOverflow.tested = true;
-      results.combiningOverflow.passed = true;
+      results.combiningOverflow.passed = !hasValidationErrors;
       results.combiningOverflow.details.push(`Tested combining beyond value 6`);
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.combiningOverflow.validationErrors.push(`${description}: ${error}`);
+        });
+      }
     }
     
     // Check for combat mechanics
     if (type === 'combat') {
       results.combatMechanics.tested = true;
-      results.combatMechanics.passed = true;
+      results.combatMechanics.passed = !hasValidationErrors;
       results.combatMechanics.details.push(`Tested: ${description}`);
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.combatMechanics.validationErrors.push(`${description}: ${error}`);
+        });
+      }
       
       // Track specific combat scenarios based on description or metadata
       if (description.includes('both should be destroyed') || 
-          description.includes('equal values')) {
+          description.includes('equal values') ||
+          description.includes('EQUAL VALUE COMBAT')) {
         trackedConditions.hasEqualValueCombat = true;
         console.log("Detected equal value combat");
       } else if (description.includes('attacker destroyed')) {
@@ -798,42 +1117,72 @@ export const analyzeTestResults = (board, moveHistory) => {
       if (description.includes('base')) {
         trackedConditions.hasAttackedBase = true;
         results.baseCombat.tested = true;
-        results.baseCombat.passed = true;
+        results.baseCombat.passed = !hasValidationErrors;
         results.baseCombat.details.push(`Tested attacking a base: ${description}`);
+        
+        if (hasValidationErrors) {
+          validation.errors.forEach(error => {
+            results.baseCombat.validationErrors.push(`${description}: ${error}`);
+          });
+        }
       }
     }
     
     // Check for base actions
     if (type === 'create' && piece && piece.value === 6) {
       results.baseActions.tested = true;
-      results.baseActions.passed = true;
+      results.baseActions.passed = !hasValidationErrors;
       results.baseActions.details.push(`Tested base action: create`);
       trackedConditions.hasBaseCreatedUnit = true;
       console.log("Detected base creating a unit");
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.baseActions.validationErrors.push(`${description} (create): ${error}`);
+        });
+      }
     }
     
     if (type === 'upgrade' && piece && piece.value === 6) {
       results.baseActions.tested = true;
-      results.baseActions.passed = true;
+      results.baseActions.passed = !hasValidationErrors;
       results.baseActions.details.push(`Tested base action: upgrade`);
       trackedConditions.hasBaseUpgradedUnit = true;
       console.log("Detected base upgrading a unit");
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.baseActions.validationErrors.push(`${description} (upgrade): ${error}`);
+        });
+      }
     }
     
     if (type === 'attack' && piece && piece.value === 6) {
       results.baseActions.tested = true;
-      results.baseActions.passed = true;
+      results.baseActions.passed = !hasValidationErrors;
       results.baseActions.details.push(`Tested base action: attack`);
       trackedConditions.hasBaseAttackedUnit = true;
       console.log("Detected base attacking an enemy unit");
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.baseActions.validationErrors.push(`${description} (attack): ${error}`);
+        });
+      }
     }
     
     // Check for empty target cell handling
     if ((type === 'move' && description.includes('empty')) || 
         type === 'create') {
       results.emptyTargets.tested = true;
-      results.emptyTargets.passed = true;
+      results.emptyTargets.passed = !hasValidationErrors;
       results.emptyTargets.details.push(`Tested interaction with empty cell`);
+      
+      if (hasValidationErrors) {
+        validation.errors.forEach(error => {
+          results.emptyTargets.validationErrors.push(`${description}: ${error}`);
+        });
+      }
     }
   });
   
@@ -879,16 +1228,32 @@ export const analyzeTestResults = (board, moveHistory) => {
   }
   
   console.log("Tracked conditions:", trackedConditions);
+  console.log("Total validation failures:", validationFailures);
   
-  return { results, warnings, boardAnalysis, trackedConditions };
+  return { 
+    results, 
+    warnings, 
+    boardAnalysis, 
+    trackedConditions,
+    validationFailures,
+    hasLogicErrors: validationFailures > 0
+  };
 };
 
 // Enhanced test report generation
 export const generateTestReport = (testData) => {
-  const { results, warnings, boardAnalysis, trackedConditions } = testData;
+  const { results, warnings, boardAnalysis, trackedConditions, validationFailures, hasLogicErrors } = testData;
   
   console.log('\n===== DICE CHESS GAME MECHANICS TEST REPORT =====');
   console.log('TIMESTAMP:', new Date().toISOString());
+  
+  // Overall validation summary
+  console.log('\n----- VALIDATION SUMMARY -----');
+  if (hasLogicErrors) {
+    console.log(`❌ TEST FAILED: Found ${validationFailures} game logic errors! The implementation does not match the rules.`);
+  } else {
+    console.log('✅ VALIDATION PASSED: No game logic errors detected. Implementation matches rules.');
+  }
   
   // Report on core mechanics
   console.log('\n----- CORE GAME MECHANICS -----');
@@ -903,6 +1268,14 @@ export const generateTestReport = (testData) => {
       if (result.details && result.details.length > 0) {
         result.details.forEach(detail => {
           console.log(`  - ${detail}`);
+        });
+      }
+      
+      // Show validation errors if any
+      if (result.validationErrors && result.validationErrors.length > 0) {
+        console.log(`  ❌ VALIDATION ERRORS:`);
+        result.validationErrors.forEach(error => {
+          console.log(`    - ${error}`);
         });
       }
     }
@@ -922,6 +1295,14 @@ export const generateTestReport = (testData) => {
       if (result.details && result.details.length > 0) {
         result.details.forEach(detail => {
           console.log(`  - ${detail}`);
+        });
+      }
+      
+      // Show validation errors if any
+      if (result.validationErrors && result.validationErrors.length > 0) {
+        console.log(`  ❌ VALIDATION ERRORS:`);
+        result.validationErrors.forEach(error => {
+          console.log(`    - ${error}`);
         });
       }
     }
@@ -952,7 +1333,10 @@ export const generateTestReport = (testData) => {
   
   console.log(`Test Coverage: ${coveragePercentage}% (${testedCount}/${totalCategories} categories tested)`);
   
-  if (allCategoriesTested && allCategoriesPassed) {
+  if (hasLogicErrors) {
+    console.log('❌ IMPLEMENTATION ERROR: The game logic does not match the expected rules!');
+    console.log('   Please check gameplayUtils.js for issues.');
+  } else if (allCategoriesTested && allCategoriesPassed) {
     console.log('🎉 All game mechanics tests passed!');
   } else if (!allCategoriesTested) {
     console.log('⚠️ Some game mechanics were not tested.');
