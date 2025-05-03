@@ -46,7 +46,7 @@ const GamePage = () => {
   return (
     <div className="game-page">
       <div className="game-container">
-        <h1>Dice Chess Game</h1>
+        <h1>SixDivides</h1>
         
         {aiThinking && (
           <div className="ai-thinking">

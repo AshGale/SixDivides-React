@@ -1,4 +1,4 @@
-# Dice Chess Game
+# SixDivides Game
 
 A tactical board game combining elements of chess and dice mechanics, built with React, Redux, and Express.
 
@@ -19,7 +19,7 @@ This project consists of two main components:
 ## Project Structure
 
 ```
-dice-chess-game/
+six-divides-game/
 ├── board-game/        # Frontend React application
 ├── server/            # Backend Express server
 ├── start-dev.bat      # Script to start development environment
