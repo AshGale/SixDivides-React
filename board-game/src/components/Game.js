@@ -21,7 +21,7 @@ const Game = () => {
   
   return (
     <div className="game-container">
-      <h1>Dice Chess Game</h1>
+      <h1>SixDivides</h1>
       
       <GameInfo />
       

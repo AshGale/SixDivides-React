@@ -16,16 +16,6 @@ function App() {
     <Provider store={store}>
       <Router>
         <div className="App">
-          <div style={{ 
-            backgroundColor: 'green', 
-            color: 'white', 
-            padding: '10px', 
-            textAlign: 'center', 
-            fontWeight: 'bold',
-            fontSize: '16px'
-          }}>
-            CODE UPDATE ACTIVE - {new Date().toLocaleTimeString()}
-          </div>
           <Notification />
           <Routes>
             <Route path="/" element={<HomePage />} />

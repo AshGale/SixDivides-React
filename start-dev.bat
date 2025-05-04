@@ -1,6 +1,6 @@
 @echo off
 echo ======================================================
-echo    Dice Chess Game - Development Environment Launcher
+echo    SixDivides Game - Development Environment Launcher
 echo ======================================================
 echo.
 
@@ -50,7 +50,7 @@ echo [INFO] Starting backend server in background...
 :: Create a simple batch file to run the backend server in the background
 echo @echo off > run_backend.bat
 echo cd server >> run_backend.bat
-echo title Dice Chess Backend Server >> run_backend.bat
+echo title SixDivides Backend Server >> run_backend.bat
 echo npm start >> run_backend.bat
 
 :: Start the backend server in background with no window

@@ -1,4 +1,4 @@
 @echo off 
 cd server 
-title Dice Chess Backend Server 
+title SixDivides Backend Server 
 npm start 
