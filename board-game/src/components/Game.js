@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import GameBoard from './board/GameBoard';
 import GameInfo from './ui/GameInfo';
@@ -14,9 +14,15 @@ const Game = () => {
   const dispatch = useDispatch();
   const { aiThinking } = useAiTurn();
   
-  // Initialize the game on component mount
+  // Use ref to prevent multiple initializations
+  const initialized = useRef(false);
+  
+  // Initialize the game on component mount (only once)
   useEffect(() => {
-    dispatch(initializeGame());
+    if (!initialized.current) {
+      dispatch(initializeGame());
+      initialized.current = true;
+    }
   }, [dispatch]);
   
   return (

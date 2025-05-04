@@ -47,7 +47,12 @@ const NewGamePage = () => {
     });
     
     // Navigate to game page
-    navigate('/game');
+    // Using state object with replace:true prevents adding to history stack
+    // This helps avoid potential navigation loops
+    navigate('/game', { 
+      state: { forceNew: true },
+      replace: true 
+    });
   };
   
   return (
