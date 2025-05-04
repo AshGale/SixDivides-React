@@ -41,10 +41,28 @@ export const saveGameToLocalStorage = (gameState, saveName) => {
   try {
     const saveKey = `dice-chess-save-${saveName}`;
     const timestamp = new Date().toISOString();
+    
+    // Extract metadata from game state
+    const { turnHistory, numPlayers, currentPlayer } = gameState;
+    
+    // Prepare metadata
+    const metadata = {
+      moveCount: turnHistory ? turnHistory.length : 0,
+      numPlayers,
+      currentPlayer,
+      // Add player information with default values
+      players: Array(numPlayers).fill().map((_, index) => ({
+        playerId: index,
+        name: `Player ${index + 1}`, // Default name
+        isAI: false, // Default to human players
+      })),
+    };
+    
     const saveData = {
       timestamp,
       saveName,
       gameState,
+      metadata,
     };
     
     localStorage.setItem(saveKey, serializeGameState(saveData));
@@ -86,6 +104,16 @@ export const getAllSavedGames = () => {
           saves.push({
             saveName: parsedData.saveName,
             timestamp: parsedData.timestamp,
+            metadata: parsedData.metadata || {
+              moveCount: parsedData.gameState?.turnHistory?.length || 0,
+              numPlayers: parsedData.gameState?.numPlayers || 4,
+              currentPlayer: parsedData.gameState?.currentPlayer || 0,
+              players: Array(parsedData.gameState?.numPlayers || 4).fill().map((_, index) => ({
+                playerId: index,
+                name: `Player ${index + 1}`,
+                isAI: false,
+              })),
+            },
             key
           });
         }
