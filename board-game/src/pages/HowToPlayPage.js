@@ -11,7 +11,7 @@ const HowToPlayPage = () => {
   return (
     <div className="how-to-play-page">
       <div className="how-to-play-container">
-        <h1>How to Play Dice Chess</h1>
+        <h1>How to Play SixDivides</h1>
         
         <div className="rules-section">
           <h2>Game Setup</h2>

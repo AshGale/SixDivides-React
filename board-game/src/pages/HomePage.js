@@ -35,7 +35,7 @@ const HomePage = () => {
   return (
     <div className="home-page">
       <div className="home-content">
-        <h1 className="game-title">Dice Chess Game</h1>
+        <h1 className="game-title">SixDivides</h1>
         <p className="game-description">
           A strategic board game where dice represent units with different abilities.
           Capture enemy bases and conquer the board!

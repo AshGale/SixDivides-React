@@ -39,7 +39,7 @@ export const deserializeGameState = (serializedState) => {
 // Save game to localStorage
 export const saveGameToLocalStorage = (gameState, saveName) => {
   try {
-    const saveKey = `dice-chess-save-${saveName}`;
+    const saveKey = `sixdivides-save-${saveName}`;
     const timestamp = new Date().toISOString();
     
     // Extract metadata from game state
@@ -76,7 +76,7 @@ export const saveGameToLocalStorage = (gameState, saveName) => {
 // Load game from localStorage
 export const loadGameFromLocalStorage = (saveName) => {
   try {
-    const saveKey = `dice-chess-save-${saveName}`;
+    const saveKey = `sixdivides-save-${saveName}`;
     const savedData = localStorage.getItem(saveKey);
     
     if (!savedData) {
@@ -97,7 +97,7 @@ export const getAllSavedGames = () => {
     const saves = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key.startsWith('dice-chess-save-')) {
+      if (key.startsWith('sixdivides-save-')) {
         const savedData = localStorage.getItem(key);
         const parsedData = deserializeGameState(savedData);
         if (parsedData) {
@@ -133,7 +133,7 @@ export const getAllSavedGames = () => {
 // Delete a saved game
 export const deleteSavedGame = (saveName) => {
   try {
-    const saveKey = `dice-chess-save-${saveName}`;
+    const saveKey = `sixdivides-save-${saveName}`;
     localStorage.removeItem(saveKey);
     return { success: true };
   } catch (error) {

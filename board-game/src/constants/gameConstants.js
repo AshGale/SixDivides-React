@@ -1,5 +1,5 @@
 /**
- * Game constants for the Dice Chess Game
+ * Game constants for the SixDivides Game
  */
 
 // Player definitions
