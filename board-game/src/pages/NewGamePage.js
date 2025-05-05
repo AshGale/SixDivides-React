@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNumPlayers } from '../store/gameSlice';
 import { setPlayerType, AI_DIFFICULTY } from '../store/aiSlice';
+import { setPlayerName } from '../store/playerSlice';
 import { PLAYERS } from '../constants/gameConstants';
 import './NewGamePage.css';
 
@@ -14,10 +15,12 @@ const NewGamePage = () => {
   const dispatch = useDispatch();
   const { numPlayers } = useSelector(state => state.game);
   const { aiPlayers, aiDelay } = useSelector(state => state.ai);
+  const { playerNames } = useSelector(state => state.player);
   
   const [localNumPlayers, setLocalNumPlayers] = useState(numPlayers);
   const [localAiPlayers, setLocalAiPlayers] = useState({...aiPlayers});
   const [localAiDelay, setLocalAiDelay] = useState(aiDelay);
+  const [localPlayerNames, setLocalPlayerNames] = useState({...playerNames});
   
   const handleNumPlayersChange = (e) => {
     setLocalNumPlayers(Number(e.target.value));
@@ -27,6 +30,13 @@ const NewGamePage = () => {
     setLocalAiPlayers({
       ...localAiPlayers,
       [playerId]: value === 'human' ? null : value
+    });
+  };
+
+  const handlePlayerNameChange = (playerId, name) => {
+    setLocalPlayerNames({
+      ...localPlayerNames,
+      [playerId]: name
     });
   };
   
@@ -43,6 +53,14 @@ const NewGamePage = () => {
       dispatch(setPlayerType({
         playerId: Number(playerId),
         type: localAiPlayers[playerId]
+      }));
+    });
+
+    // Update player names
+    Object.keys(localPlayerNames).forEach(playerId => {
+      dispatch(setPlayerName({
+        playerId: Number(playerId),
+        name: localPlayerNames[playerId]
       }));
     });
     
@@ -101,6 +119,15 @@ const NewGamePage = () => {
                   <option value={AI_DIFFICULTY.MEDIUM}>AI - Aggressive</option>
                   <option value={AI_DIFFICULTY.HARD}>AI - Defensive</option>
                 </select>
+                {localAiPlayers[player.id] === null && (
+                  <input
+                    type="text"
+                    placeholder={`Player ${player.id + 1} Name`}
+                    value={localPlayerNames[player.id]}
+                    onChange={(e) => handlePlayerNameChange(player.id, e.target.value)}
+                    className="player-name-input"
+                  />
+                )}
               </div>
             ))}
           </div>

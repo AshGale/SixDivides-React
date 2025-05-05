@@ -108,6 +108,25 @@
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
+.player-name-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 0.9rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.player-name-input:hover {
+  border-color: #aaa;
+}
+
+.player-name-input:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
 .ai-delay-setting {
   display: flex;
   align-items: center;

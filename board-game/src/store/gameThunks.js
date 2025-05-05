@@ -14,6 +14,8 @@ import {
   serializeGameState, 
   deserializeGameState 
 } from '../services/persistenceService';
+import { setPlayerName } from './playerSlice';
+import { setPlayerType } from './aiSlice';
 
 // Save game thunk
 export const saveGame = createAsyncThunk(
@@ -24,8 +26,14 @@ export const saveGame = createAsyncThunk(
       const state = getState();
       const gameState = state.game;
       
-      // Save game state
-      const result = await persistenceAPI.saveGame(gameState, saveName);
+      // Get player data
+      const playerData = {
+        playerNames: state.player.playerNames,
+        aiPlayers: state.ai.aiPlayers
+      };
+      
+      // Save game state with player data
+      const result = await persistenceAPI.saveGame(gameState, saveName, playerData);
       
       // Update UI with save status
       dispatch(saveGameState({ 
@@ -65,9 +73,35 @@ export const loadGame = createAsyncThunk(
         // or directly in result.data (old format)
         const gameState = result.data.gameState || result.data;
         
+        // Extract player data if available
+        const playerData = result.data.playerData;
+        
         if (gameState) {
           // Dispatch action to load game state
           dispatch(loadGameState(gameState));
+          
+          // Restore player names and AI settings if available
+          if (playerData) {
+            // Restore player names
+            if (playerData.playerNames) {
+              Object.entries(playerData.playerNames).forEach(([playerId, name]) => {
+                dispatch(setPlayerName({
+                  playerId: Number(playerId),
+                  name
+                }));
+              });
+            }
+            
+            // Restore AI settings
+            if (playerData.aiPlayers) {
+              Object.entries(playerData.aiPlayers).forEach(([playerId, type]) => {
+                dispatch(setPlayerType({
+                  playerId: Number(playerId),
+                  type
+                }));
+              });
+            }
+          }
           
           // Clear status after 3 seconds
           setTimeout(() => {
