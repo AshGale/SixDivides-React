@@ -8,7 +8,7 @@ import { setPlayerName } from '../../store/playerSlice';
 import { loadGame } from '../../store/gameThunks';
 import './Modal.css';
 
-const CustomLoadModal = ({ onClose, saveToLoad }) => {
+const CustomLoadModal = ({ onClose, saveToLoad, onCompleteLoad }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { aiPlayers } = useSelector(state => state.ai);
@@ -78,13 +78,19 @@ const CustomLoadModal = ({ onClose, saveToLoad }) => {
         customSettings: true
       })).unwrap();
       
-      // Close modal
-      onClose();
-      
-      // Navigate to game page
-      setTimeout(() => {
-        navigate('/game', { state: { fromLoad: true, loadedAt: new Date().getTime() } });
-      }, 100);
+      // If we have a direct complete handler, use it - this will close all modals
+      // and navigate directly to the game page
+      if (onCompleteLoad) {
+        onCompleteLoad();
+      } else {
+        // Fallback to the original behavior
+        onClose();
+        
+        // Navigate to game page
+        setTimeout(() => {
+          navigate('/game', { state: { fromLoad: true, loadedAt: new Date().getTime() } });
+        }, 100);
+      }
     } catch (err) {
       setError(`Failed to load game: ${err.message}`);
       setLoading(false);

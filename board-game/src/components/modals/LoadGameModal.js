@@ -68,6 +68,17 @@ const LoadGameModal = ({ onClose }) => {
     setShowCustomModal(true);
   };
 
+  // Handler for closing all modals and going directly to the game
+  const handleCloseAllAndNavigate = () => {
+    // Close the main load modal which will also unmount the custom modal
+    onClose();
+    
+    // Navigate to game page directly
+    setTimeout(() => {
+      navigate('/game', { state: { fromLoad: true, loadedAt: new Date().getTime() } });
+    }, 100);
+  };
+
   const handleDeleteSave = async (e, saveName) => {
     e.stopPropagation(); // Prevent selecting the save when clicking delete
     
@@ -100,6 +111,7 @@ const LoadGameModal = ({ onClose }) => {
       <CustomLoadModal 
         onClose={() => setShowCustomModal(false)} 
         saveToLoad={selectedSave}
+        onCompleteLoad={handleCloseAllAndNavigate}
       />
     );
   }
