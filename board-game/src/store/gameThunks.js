@@ -63,7 +63,7 @@ export const saveGame = createAsyncThunk(
 // Load game thunk
 export const loadGame = createAsyncThunk(
   'game/loadGame',
-  async ({ saveName }, { dispatch }) => {
+  async ({ saveName, customSettings = false }, { dispatch, getState }) => {
     try {
       // Load game state
       const result = await persistenceAPI.loadGame(saveName);
@@ -80,8 +80,8 @@ export const loadGame = createAsyncThunk(
           // Dispatch action to load game state
           dispatch(loadGameState(gameState));
           
-          // Restore player names and AI settings if available
-          if (playerData) {
+          // If not using custom settings, restore player names and AI settings from save
+          if (!customSettings && playerData) {
             // Restore player names
             if (playerData.playerNames) {
               Object.entries(playerData.playerNames).forEach(([playerId, name]) => {

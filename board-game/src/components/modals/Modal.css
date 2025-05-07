@@ -25,6 +25,10 @@
   max-width: 600px;
 }
 
+.custom-load-modal {
+  max-width: 700px;
+}
+
 .modal-content h2 {
   margin-top: 0;
   margin-bottom: 16px;
@@ -60,10 +64,15 @@
 
 .modal-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 10px;
   border-top: 1px solid #ddd;
   padding-top: 15px;
+}
+
+.load-options {
+  display: flex;
+  gap: 10px;
 }
 
 .btn-primary, .btn-secondary {
@@ -95,6 +104,11 @@
 
 .btn-secondary:hover {
   background-color: #5a6268;
+}
+
+.btn-secondary:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
 }
 
 .error-message {
@@ -172,6 +186,20 @@
 .save-timestamp {
   font-size: 12px;
   color: #666;
+  margin-bottom: 4px;
+}
+
+.save-info {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+}
+
+.save-info span {
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 .delete-save {
@@ -237,4 +265,43 @@
 
 .player-info li:last-child {
   margin-bottom: 0;
+}
+
+/* Custom Load Modal */
+.custom-load-info {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border-left: 4px solid #007bff;
+}
+
+.player-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.player-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.player-label {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.player-setting select,
+.player-name-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
