@@ -12,6 +12,7 @@ const GameInfo = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { currentPlayer, actions, showTurnMessage, winner } = useSelector(state => state.game);
+  const { playerNames } = useSelector(state => state.player);
 
   const handleNewGame = () => {
     // Navigate to the new game setup screen instead of starting a new game directly
@@ -23,11 +24,21 @@ const GameInfo = () => {
     dispatch(initializeGame());
   };
 
+  // Get the current player's name, fallback to default if not found
+  const getCurrentPlayerName = () => {
+    return playerNames[currentPlayer] || PLAYERS[currentPlayer].name;
+  };
+
+  // Get a player's name by ID, fallback to default if not found
+  const getPlayerName = (playerId) => {
+    return playerNames[playerId] || PLAYERS[playerId].name;
+  };
+
   return (
     <div className="game-info">
       <div className="game-status">
         <div className="current-player">
-          Current Player: <span style={{ color: PLAYERS[currentPlayer].color }}>{PLAYERS[currentPlayer].name}</span>
+          Current Player: <span style={{ color: PLAYERS[currentPlayer].color }}>{getCurrentPlayerName()}</span>
         </div>
         <div className="actions">
           Actions Remaining: {actions}
@@ -48,7 +59,7 @@ const GameInfo = () => {
           className="turn-message" 
           style={{ backgroundColor: PLAYERS[currentPlayer].color }}
         >
-          {PLAYERS[currentPlayer].name}'s Turn!
+          {getCurrentPlayerName()}'s Turn!
         </div>
       )}
       
@@ -58,7 +69,7 @@ const GameInfo = () => {
             className="win-message" 
             style={{ backgroundColor: winner.color }}
           >
-            {winner.name} Wins!
+            {getPlayerName(winner.id)} Wins!
           </div>
           <div className="win-actions">
             <button 

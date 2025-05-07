@@ -9,6 +9,18 @@ const SaveGameModal = ({ onClose }) => {
   const dispatch = useDispatch();
   const saveStatus = useSelector(state => state.game.saveStatus);
   const inProgress = useSelector(state => state.game.gameState === 'IN_PROGRESS');
+  const turnHistory = useSelector(state => state.game.turnHistory);
+  const currentPlayer = useSelector(state => state.game.currentPlayer);
+  const numPlayers = useSelector(state => state.game.numPlayers);
+
+  // Generate metadata for display
+  const moveCount = turnHistory ? turnHistory.length : 0;
+  const playerInfo = Array(numPlayers).fill().map((_, index) => ({
+    playerId: index,
+    name: `Player ${index + 1}`,
+    isAI: false, // Default value, would be replaced with actual data once implemented
+    isCurrent: index === currentPlayer
+  }));
 
   const handleSave = async () => {
     if (!saveName.trim()) {
@@ -49,6 +61,23 @@ const SaveGameModal = ({ onClose }) => {
               placeholder="Enter a name for your save"
               className="form-control"
             />
+          </div>
+          
+          <div className="save-game-info">
+            <h3>Game Information</h3>
+            <p><strong>Move Count:</strong> {moveCount}</p>
+            <p><strong>Number of Players:</strong> {numPlayers}</p>
+            <div className="player-info">
+              <h4>Players:</h4>
+              <ul>
+                {playerInfo.map(player => (
+                  <li key={player.playerId}>
+                    {player.name} {player.isCurrent ? '(Current Turn)' : ''} 
+                    {player.isAI ? ' (AI)' : ' (Human)'}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           
           {error && <div className="error-message">{error}</div>}

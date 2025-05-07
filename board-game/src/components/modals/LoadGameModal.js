@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchSavedGames, loadGame, deleteSavedGame } from '../../store/gameThunks';
+import CustomLoadModal from './CustomLoadModal';
 import './Modal.css';
 
 const LoadGameModal = ({ onClose }) => {
@@ -12,6 +13,7 @@ const LoadGameModal = ({ onClose }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedSave, setSelectedSave] = useState(null);
+  const [showCustomModal, setShowCustomModal] = useState(false);
 
   // Fetch saved games on component mount
   useEffect(() => {
@@ -29,16 +31,20 @@ const LoadGameModal = ({ onClose }) => {
     fetchSaves();
   }, [dispatch]);
 
-  const handleLoadGame = async () => {
+  const handleQuickLoad = async () => {
     if (!selectedSave) {
       setError('Please select a save first');
       return;
     }
 
     setError('');
+    setLoading(true);
     try {
-      // Load the game
-      const result = await dispatch(loadGame({ saveName: selectedSave.saveName })).unwrap();
+      // Quick load the game with default settings
+      const result = await dispatch(loadGame({ 
+        saveName: selectedSave.saveName,
+        customSettings: false
+      })).unwrap();
       
       // Close modal
       onClose();
@@ -49,7 +55,28 @@ const LoadGameModal = ({ onClose }) => {
       }, 100);
     } catch (err) {
       setError(`Failed to load game: ${err.message}`);
+      setLoading(false);
     }
+  };
+
+  const handleCustomLoad = () => {
+    if (!selectedSave) {
+      setError('Please select a save first');
+      return;
+    }
+    // Show the custom load modal
+    setShowCustomModal(true);
+  };
+
+  // Handler for closing all modals and going directly to the game
+  const handleCloseAllAndNavigate = () => {
+    // Close the main load modal which will also unmount the custom modal
+    onClose();
+    
+    // Navigate to game page directly
+    setTimeout(() => {
+      navigate('/game', { state: { fromLoad: true, loadedAt: new Date().getTime() } });
+    }, 100);
   };
 
   const handleDeleteSave = async (e, saveName) => {
@@ -77,6 +104,17 @@ const LoadGameModal = ({ onClose }) => {
       return 'Invalid date';
     }
   };
+
+  // If custom load modal is showing, render it instead
+  if (showCustomModal) {
+    return (
+      <CustomLoadModal 
+        onClose={() => setShowCustomModal(false)} 
+        saveToLoad={selectedSave}
+        onCompleteLoad={handleCloseAllAndNavigate}
+      />
+    );
+  }
 
   return (
     <div className="modal-overlay">
@@ -109,6 +147,15 @@ const LoadGameModal = ({ onClose }) => {
                       <div className="save-details">
                         <div className="save-name">{save.saveName}</div>
                         <div className="save-timestamp">{formatDate(save.timestamp)}</div>
+                        <div className="save-info">
+                          {save.metadata && (
+                            <>
+                              <span>Players: {save.metadata.numPlayers}</span>
+                              <span>Turn: {save.metadata.currentPlayer + 1}</span>
+                              <span>Moves: {save.metadata.moveCount}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                       <button 
                         className="delete-save" 
@@ -132,13 +179,22 @@ const LoadGameModal = ({ onClose }) => {
           >
             Cancel
           </button>
-          <button 
-            className="btn-primary" 
-            onClick={handleLoadGame}
-            disabled={!selectedSave}
-          >
-            Load Game
-          </button>
+          <div className="load-options">
+            <button 
+              className="btn-secondary" 
+              onClick={handleCustomLoad}
+              disabled={!selectedSave || loading}
+            >
+              Custom Load
+            </button>
+            <button 
+              className="btn-primary" 
+              onClick={handleQuickLoad}
+              disabled={!selectedSave || loading}
+            >
+              Quick Load
+            </button>
+          </div>
         </div>
       </div>
     </div>

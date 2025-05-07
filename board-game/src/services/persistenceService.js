@@ -37,14 +37,33 @@ export const deserializeGameState = (serializedState) => {
 };
 
 // Save game to localStorage
-export const saveGameToLocalStorage = (gameState, saveName) => {
+export const saveGameToLocalStorage = (gameState, saveName, playerData) => {
   try {
     const saveKey = `sixdivides-save-${saveName}`;
     const timestamp = new Date().toISOString();
+    
+    // Extract metadata from game state
+    const { turnHistory, numPlayers, currentPlayer } = gameState;
+
+    // Prepare metadata
+    const metadata = {
+      moveCount: turnHistory ? turnHistory.length : 0,
+      numPlayers,
+      currentPlayer,
+      // Add player information with names from playerData
+      players: Array(numPlayers).fill().map((_, index) => ({
+        playerId: index,
+        name: playerData.playerNames ? playerData.playerNames[index] : `Player ${index + 1}`,
+        isAI: playerData.aiPlayers ? playerData.aiPlayers[index] !== null : false,
+      })),
+    };
+    
     const saveData = {
       timestamp,
       saveName,
       gameState,
+      metadata,
+      playerData, // Store the full player data for complete restoration
     };
     
     localStorage.setItem(saveKey, serializeGameState(saveData));
@@ -86,6 +105,16 @@ export const getAllSavedGames = () => {
           saves.push({
             saveName: parsedData.saveName,
             timestamp: parsedData.timestamp,
+            metadata: parsedData.metadata || {
+              moveCount: parsedData.gameState?.turnHistory?.length || 0,
+              numPlayers: parsedData.gameState?.numPlayers || 4,
+              currentPlayer: parsedData.gameState?.currentPlayer || 0,
+              players: Array(parsedData.gameState?.numPlayers || 4).fill().map((_, index) => ({
+                playerId: index,
+                name: parsedData.playerData?.playerNames?.[index] || `Player ${index + 1}`,
+                isAI: parsedData.playerData?.aiPlayers?.[index] !== null,
+              })),
+            },
             key
           });
         }
@@ -120,45 +149,128 @@ export const persistenceAPI = {
   baseUrl: 'http://localhost:3001/api',
   
   // Save game to API
-  saveGame: async (gameState, saveName) => {
-    // This is a placeholder for future implementation
-    console.log('API saveGame called - would save to:', `${persistenceAPI.baseUrl}/games/${saveName}`);
-    
-    // For now, just save to localStorage
-    return saveGameToLocalStorage(gameState, saveName);
+  saveGame: async (gameState, saveName, playerData) => {
+    try {
+      // Attempt to use the API endpoint
+      try {
+        const response = await fetch(`${persistenceAPI.baseUrl}/saves`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ gameState, saveName, playerData })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (apiError) {
+        console.warn('API save failed, falling back to localStorage:', apiError);
+        // Fall back to localStorage if API fails
+        return saveGameToLocalStorage(gameState, saveName, playerData);
+      }
+    } catch (error) {
+      console.error('Error saving game:', error);
+      // Try localStorage as a last resort
+      try {
+        return saveGameToLocalStorage(gameState, saveName, playerData);
+      } catch (localError) {
+        return { success: false, error: localError.message };
+      }
+    }
   },
   
   // Load game from API
   loadGame: async (saveName) => {
-    // This is a placeholder for future implementation
-    console.log('API loadGame called - would load from:', `${persistenceAPI.baseUrl}/games/${saveName}`);
-    
-    // For now, just load from localStorage
-    return loadGameFromLocalStorage(saveName);
+    try {
+      // Attempt to use the API endpoint
+      try {
+        const response = await fetch(`${persistenceAPI.baseUrl}/saves/${saveName}`);
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (apiError) {
+        console.warn('API load failed, falling back to localStorage:', apiError);
+        // Fall back to localStorage if API fails
+        return loadGameFromLocalStorage(saveName);
+      }
+    } catch (error) {
+      console.error('Error loading game:', error);
+      // Try localStorage as a last resort
+      try {
+        return loadGameFromLocalStorage(saveName);
+      } catch (localError) {
+        return { success: false, error: localError.message };
+      }
+    }
   },
   
   // Get list of saved games from API
   getSavedGames: async () => {
-    // This is a placeholder for future implementation
-    console.log('API getSavedGames called - would fetch from:', `${persistenceAPI.baseUrl}/games`);
-    
-    // For now, just get from localStorage
-    return getAllSavedGames();
+    try {
+      // Attempt to use the API endpoint
+      try {
+        const response = await fetch(`${persistenceAPI.baseUrl}/saves`);
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (apiError) {
+        console.warn('API fetch failed, falling back to localStorage:', apiError);
+        // Fall back to localStorage if API fails
+        return getAllSavedGames();
+      }
+    } catch (error) {
+      console.error('Error fetching saved games:', error);
+      // Try localStorage as a last resort
+      try {
+        return getAllSavedGames();
+      } catch (localError) {
+        return { success: false, error: localError.message };
+      }
+    }
   },
   
   // Delete saved game from API
   deleteSavedGame: async (saveName) => {
-    // This is a placeholder for future implementation
-    console.log('API deleteSavedGame called - would delete from:', `${persistenceAPI.baseUrl}/games/${saveName}`);
-    
-    // For now, just delete from localStorage
-    return deleteSavedGame(saveName);
+    try {
+      // Attempt to use the API endpoint
+      try {
+        const response = await fetch(`${persistenceAPI.baseUrl}/saves/${saveName}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (apiError) {
+        console.warn('API delete failed, falling back to localStorage:', apiError);
+        // Fall back to localStorage if API fails
+        return deleteSavedGame(saveName);
+      }
+    } catch (error) {
+      console.error('Error deleting saved game:', error);
+      // Try localStorage as a last resort
+      try {
+        return deleteSavedGame(saveName);
+      } catch (localError) {
+        return { success: false, error: localError.message };
+      }
+    }
   },
   
   // Get available scenarios
   getScenarios: async () => {
     try {
-      // Use the actual API endpoint to get scenarios
       const response = await fetch(`${persistenceAPI.baseUrl}/scenarios`);
       
       if (!response.ok) {

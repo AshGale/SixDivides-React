@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import GameBoard from '../components/board/GameBoard';
@@ -19,14 +19,34 @@ const GamePage = () => {
   const { winner, gameState: currentGameState } = gameState;
   const { aiThinking } = useAiTurn();
   
-  // Check if we came here from loading a game
+  // Use a ref to track if we've already processed initialization
+  // This prevents infinite re-renders
+  const initProcessedRef = useRef(false);
+  
+  // Check if we came here from loading a game or starting a new game
   const fromLoad = location.state?.fromLoad === true;
+  const forceNew = location.state?.forceNew === true;
   
   // Initialize the game on component mount only if no game is already loaded
   useEffect(() => {
+    // Skip if we've already processed initialization
+    if (initProcessedRef.current) {
+      return;
+    }
+    
+    // Mark as processed to prevent repeated initialization
+    initProcessedRef.current = true;
+    
     // Don't initialize if we just loaded a game from the home screen
     if (fromLoad) {
       console.log('Game loaded from home screen, skipping initialization');
+      return;
+    }
+    
+    // Force initialization if coming from the New Game page
+    if (forceNew) {
+      console.log('Starting new game, forcing initialization');
+      dispatch(initializeGame());
       return;
     }
     
@@ -37,7 +57,7 @@ const GamePage = () => {
     } else {
       console.log('Game already in progress, skipping initialization');
     }
-  }, [dispatch, currentGameState, gameState.board, fromLoad]);
+  }, [dispatch, currentGameState, gameState.board, fromLoad, forceNew]);
   
   const handleBackToMenu = () => {
     navigate('/');
