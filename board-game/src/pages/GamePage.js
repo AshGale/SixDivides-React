@@ -16,7 +16,7 @@ const GamePage = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const gameState = useSelector(state => state.game);
-  const { winner, gameState: currentGameState } = gameState;
+  const { gameState: currentGameState } = gameState;
   const { aiThinking } = useAiTurn();
   
   // Use a ref to track if we've already processed initialization

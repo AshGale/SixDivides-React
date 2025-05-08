@@ -1,5 +1,5 @@
-import { UNIT_TYPES, PLAYERS, GAME_STATES } from '../constants/gameConstants';
-import { getStartingActions as calculateStartingActions, checkWinCondition as determineWinner, findNextPlayerWithUnits as getNextPlayer } from './gameplayUtils'; // Placeholder for self-import during move
+import { UNIT_TYPES } from '../constants/gameConstants';
+// Self-imports removed to avoid circular dependency
 
 /**
  * Helper function to get starting actions for a player
@@ -36,15 +36,16 @@ export const findNextPlayerWithUnits = (board, currentPlayer, numPlayers) => {
   let playersChecked = 0;
   
   while (playersChecked < numPlayers) {
+    const currentPlayerToCheck = nextPlayer; // Store current value in a block-scoped variable
     const playerHasUnits = board.flat().some(cell => 
-      cell && cell.playerId === nextPlayer
+      cell && cell.playerId === currentPlayerToCheck
     );
     
     if (playerHasUnits) {
-      const startingActions = getStartingActions(board, nextPlayer); // Use exported version
+      const startingActions = getStartingActions(board, currentPlayerToCheck); // Use exported version
       // If the next player has no actions, skip them too
       if (startingActions > 0) {
-        return nextPlayer;
+        return currentPlayerToCheck;
       }
     }
     
