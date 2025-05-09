@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { persistenceAPI } from '../services/persistenceService';
 import { loadGameState } from '../store/gameSlice';
 import './ScenariosPage.css';

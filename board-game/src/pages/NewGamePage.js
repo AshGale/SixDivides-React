@@ -22,9 +22,7 @@ const NewGamePage = () => {
   const [localAiDelay, setLocalAiDelay] = useState(aiDelay);
   const [localPlayerNames, setLocalPlayerNames] = useState({...playerNames});
   
-  const handleNumPlayersChange = (e) => {
-    setLocalNumPlayers(Number(e.target.value));
-  };
+  // handleNumPlayersChange was removed as it's now handled directly in the onClick handlers
   
   const handlePlayerTypeChange = (playerId, value) => {
     setLocalAiPlayers({

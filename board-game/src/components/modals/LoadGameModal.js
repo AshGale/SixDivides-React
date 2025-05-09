@@ -41,7 +41,7 @@ const LoadGameModal = ({ onClose }) => {
     setLoading(true);
     try {
       // Quick load the game with default settings
-      const result = await dispatch(loadGame({ 
+      await dispatch(loadGame({ 
         saveName: selectedSave.saveName,
         customSettings: false
       })).unwrap();

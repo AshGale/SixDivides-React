@@ -126,10 +126,19 @@ const MapEditorPage = () => {
     // Regular local save
     else {
       // Save to localStorage with a custom prefix
-      const saveName = `custom-map-${mapName}`;
-      const result = saveGameToLocalStorage(customMapState, saveName);
+      // Save the map using the custom prefix
+      // Create default playerData to avoid errors when accessing playerNames
+      const defaultPlayerData = {
+        playerNames: {0: 'Player 1', 1: 'Player 2', 2: 'Player 3', 3: 'Player 4'},
+        aiPlayers: {0: null, 1: null, 2: null, 3: null}
+      };
       
-      if (result.success) {
+      const saveResult = saveGameToLocalStorage(
+        customMapState, 
+        `custom-map-${mapName}`,
+        defaultPlayerData
+      );
+      if (saveResult.success) {
         setSaveStatus({ success: true, message: 'Map saved successfully' });
         
         // Update available saves in Redux

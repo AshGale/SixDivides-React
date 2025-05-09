@@ -54,7 +54,7 @@ const HomePage = () => {
           </button>
           
           <Link to="/scenarios" className="home-button scenario-button">
-            Scenario Maps
+            Scenarios WIP
           </Link>
           
           <Link to="/map-editor" className="home-button editor-button">
