@@ -83,7 +83,8 @@ export const gameSlice = createSlice({
 
       if (newBoard !== state.board) { // Check if the board actually changed
         state.board = newBoard;
-        state.actions -= 1;
+        // Ensure actions don't go below 0
+        state.actions = Math.max(0, state.actions - 1);
         state.turnHistory.push({ 
           type: 'move', 
           player: state.currentPlayer, 
@@ -109,7 +110,8 @@ export const gameSlice = createSlice({
       
       if (newBoard !== state.board) {
         state.board = newBoard;
-        state.actions -= 1;
+        // Ensure actions don't go below 0
+        state.actions = Math.max(0, state.actions - 1);
         state.turnHistory.push({
           type: 'combine',
           player: state.currentPlayer,
@@ -140,21 +142,20 @@ export const gameSlice = createSlice({
       
       if (newBoard !== state.board) {
         state.board = newBoard;
-        state.actions -= 1;
-         // Check win condition after combat
+        // Ensure actions don't go below 0
+        state.actions = Math.max(0, state.actions - 1);
+        state.turnHistory.push({
+          type: 'combat',
+          player: state.currentPlayer,
+          attacker: { row: attackerRow, col: attackerCol, unit: attackerBefore },
+          defender: { row: defenderRow, col: defenderCol, unit: defenderBefore },
+          boardAfter: cloneBoard(newBoard) // Record state after combat
+        });
+        // Check win condition after combat
         const winnerId = checkWinCondition(newBoard);
         if (winnerId !== null) {
           state.winner = PLAYERS[winnerId];
           state.gameState = GAME_STATES.FINISHED;
-        } else {
-          // Only record history if game is not over
-          state.turnHistory.push({
-            type: 'combat',
-            player: state.currentPlayer,
-            attacker: { row: attackerRow, col: attackerCol, unit: attackerBefore },
-            defender: { row: defenderRow, col: defenderCol, unit: defenderBefore },
-            boardAfter: cloneBoard(newBoard) // Record state after combat
-          });
         }
       } else {
         // Handle case where combat didn't happen 
@@ -166,30 +167,28 @@ export const gameSlice = createSlice({
     handleBaseAction: (state, action) => {
       const { baseRow, baseCol, targetRow, targetCol, actionType } = action.payload;
       const boardBefore = cloneBoard(state.board); // For history
-      const targetBefore = boardBefore[targetRow][targetCol];
       
       // Use logic function to process base action
-      const newBoard = processBaseAction(state.board, baseRow, baseCol, targetRow, targetCol, actionType);
+      const newBoard = processBaseAction(state.board, baseRow, baseCol, targetRow, targetCol, actionType, state.currentPlayer);
       
       if (newBoard !== state.board) {
         state.board = newBoard;
-        state.actions -= 1;
+        // Ensure actions don't go below 0
+        state.actions = Math.max(0, state.actions - 1);
+        state.turnHistory.push({
+          type: 'baseAction',
+          player: state.currentPlayer,
+          base: { row: baseRow, col: baseCol },
+          target: { row: targetRow, col: targetCol },
+          actionType,
+          targetBefore: boardBefore[targetRow][targetCol],
+          targetAfter: newBoard[targetRow][targetCol]
+        });
         // Check win condition after base action
         const winnerId = checkWinCondition(newBoard);
         if (winnerId !== null) {
           state.winner = PLAYERS[winnerId];
           state.gameState = GAME_STATES.FINISHED;
-        } else {
-          // Record history
-          state.turnHistory.push({
-            type: 'baseAction',
-            player: state.currentPlayer,
-            base: { row: baseRow, col: baseCol },
-            target: { row: targetRow, col: targetCol },
-            actionType,
-            targetBefore: targetBefore,
-            targetAfter: newBoard[targetRow][targetCol]
-          });
         }
       } else {
          // Handle case where base action didn't happen
@@ -199,10 +198,16 @@ export const gameSlice = createSlice({
     },
     
     decrementActions: (state) => {
-      state.actions -= 1;
+      // Ensure actions never go below 0
+      state.actions = Math.max(0, state.actions - 1);
     },
     
     endTurn: (state) => {
+      // Fix actions if somehow they went negative
+      if (state.actions < 0) {
+        state.actions = 0;
+      }
+      
       // Check win condition before ending turn (in case last action caused win)
       const winnerId = checkWinCondition(state.board);
       if (winnerId !== null) {

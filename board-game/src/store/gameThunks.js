@@ -78,6 +78,24 @@ export const loadGame = createAsyncThunk(
           
           // If not using custom settings, restore player names and AI settings from save
           if (!customSettings && playerData) {
+            // Get number of players from the gameState
+            const numPlayers = gameState.numPlayers || 4;
+            
+            // Reset all players to default state first
+            for (let i = 0; i < numPlayers; i++) {
+              // Default to human players
+              dispatch(setPlayerType({
+                playerId: i,
+                type: null
+              }));
+              
+              // Set default player names
+              dispatch(setPlayerName({
+                playerId: i,
+                name: `Player ${i + 1}`
+              }));
+            }
+            
             // Restore player names
             if (playerData.playerNames) {
               Object.entries(playerData.playerNames).forEach(([playerId, name]) => {
