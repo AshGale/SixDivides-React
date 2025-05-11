@@ -27,7 +27,10 @@ const GameBoard = () => {
     validMoves, 
     actions, 
     showTurnMessage,
-    winner
+    winner,
+    isTutorialMode,
+    tutorialStep,
+    tutorialSteps
   } = useSelector(state => state.game);
   const { aiPlayers } = useSelector(state => state.ai);
 
@@ -62,6 +65,12 @@ const GameBoard = () => {
     if (winner || actions <= 0) return;
 
     const piece = board[row][col];
+    
+    // Handle tutorial-specific click behavior
+    if (isTutorialMode) {
+      handleTutorialCellClick(row, col, piece);
+      return;
+    }
     
     // If clicking a valid move location
     if (selectedPiece && validMoves.some(move => move.row === row && move.col === col)) {
@@ -136,6 +145,69 @@ const GameBoard = () => {
     }
   };
 
+  // Handle tutorial-specific cell clicks
+  const handleTutorialCellClick = (row, col, piece) => {
+    const currentTutorialStep = tutorialSteps[tutorialStep];
+    
+    if (!currentTutorialStep) return;
+    
+    // Only allow specific actions based on current tutorial step
+    if (currentTutorialStep.action === 'CLICK_UNIT') {
+      // Only allow selecting the specific unit mentioned in the tutorial
+      if (piece && piece.id === currentTutorialStep.targetUnit) {
+        dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+        dispatch(setValidMoves(moves));
+      }
+    } 
+    else if (currentTutorialStep.action === 'MOVE_TO' || currentTutorialStep.action === 'ATTACK') {
+      // If we have a selected piece and are targeting a specific position
+      if (selectedPiece && 
+          currentTutorialStep.targetPosition && 
+          row === currentTutorialStep.targetPosition.y && 
+          col === currentTutorialStep.targetPosition.x) {
+        
+        if (currentTutorialStep.action === 'MOVE_TO' && !piece) {
+          // Execute the move action
+          dispatch(movePiece({ 
+            fromRow: selectedPiece.row, 
+            fromCol: selectedPiece.col, 
+            toRow: row, 
+            toCol: col 
+          }));
+        } 
+        else if (currentTutorialStep.action === 'ATTACK' && piece && piece.playerId !== currentPlayer) {
+          // Execute the attack action
+          dispatch(handleCombat({ 
+            attackerRow: selectedPiece.row, 
+            attackerCol: selectedPiece.col, 
+            defenderRow: row, 
+            defenderCol: col 
+          }));
+        }
+      } 
+      else if (piece && piece.playerId === currentPlayer) {
+        // Still allow selecting pieces
+        dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+        dispatch(setValidMoves(moves));
+      } 
+      else {
+        dispatch(clearSelection());
+      }
+    }
+    else {
+      // Default behavior for other tutorial steps
+      if (piece && piece.playerId === currentPlayer) {
+        dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+        dispatch(setValidMoves(moves));
+      } else {
+        dispatch(clearSelection());
+      }
+    }
+  };
+  
   return (
     <div className="game-board">
       {board.map((row, rowIndex) => (
@@ -146,7 +218,7 @@ const GameBoard = () => {
               row={rowIndex}
               col={colIndex}
               cell={cell}
-              className={getCellClasses(rowIndex, colIndex, validMoves, selectedPiece, board, currentPlayer)}
+              className={`${getCellClasses(rowIndex, colIndex, validMoves, selectedPiece, board, currentPlayer)} cell-${colIndex}-${rowIndex} ${cell ? `unit-cell-${colIndex}-${rowIndex}` : ''}`}
               onClick={handleCellClick}
             />
           ))}

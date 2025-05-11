@@ -15,6 +15,8 @@ const BoardCell = ({
     <div
       className={`board-cell ${className}`}
       onClick={() => onClick(row, col)}
+      data-x={col}
+      data-y={row}
     >
       {cell && (
         <div

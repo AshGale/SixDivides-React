@@ -8,6 +8,8 @@ import GamePage from './pages/GamePage';
 import HowToPlayPage from './pages/HowToPlayPage';
 import MapEditorPage from './pages/MapEditorPage';
 import ScenariosPage from './pages/ScenariosPage';
+import TutorialPage from './pages/TutorialPage';
+import TutorialGamePage from './pages/TutorialGamePage';
 import Notification from './components/ui/Notification';
 import './App.css';
 
@@ -24,6 +26,8 @@ function App() {
             <Route path="/how-to-play" element={<HowToPlayPage />} />
             <Route path="/map-editor" element={<MapEditorPage />} />
             <Route path="/scenarios" element={<ScenariosPage />} />
+            <Route path="/tutorial" element={<TutorialPage />} />
+            <Route path="/tutorial-game" element={<TutorialGamePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

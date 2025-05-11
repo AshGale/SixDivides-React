@@ -1,0 +1,82 @@
+.tutorial-completion-modal .modal-content {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.tutorial-completion-modal .modal-header {
+  background-color: #007bff;
+  color: white;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom: none;
+  padding: 15px 20px;
+}
+
+.tutorial-completion-modal .modal-title {
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.tutorial-completion-modal .modal-body {
+  padding: 25px;
+}
+
+.completion-content {
+  text-align: center;
+}
+
+.completion-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px auto;
+  width: 100px;
+  height: 100px;
+  background-color: #f8f9fa;
+  border-radius: 50%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.completion-content h3 {
+  color: #28a745;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.completion-content p {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.tutorial-completion-modal .modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding: 15px 20px;
+}
+
+.tutorial-completion-modal .btn-primary {
+  background-color: #28a745;
+  border-color: #28a745;
+  font-weight: 500;
+  padding: 8px 20px;
+}
+
+.tutorial-completion-modal .btn-primary:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.tutorial-completion-modal .btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  font-weight: 500;
+  padding: 8px 20px;
+}
+
+.tutorial-completion-modal .btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}

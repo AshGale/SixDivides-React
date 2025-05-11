@@ -57,6 +57,10 @@ const HomePage = () => {
             Scenarios WIP
           </Link>
           
+          <Link to="/tutorial" className="home-button primary-button">
+            Tutorial
+          </Link>
+          
           <Link to="/map-editor" className="home-button editor-button">
             Custom Map Editor
           </Link>

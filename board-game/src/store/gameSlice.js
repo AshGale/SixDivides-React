@@ -3,6 +3,7 @@ import {
   PLAYERS, 
   GAME_STATES 
 } from '../constants/gameConstants';
+import { tutorialSteps, tutorialBasicMovement } from '../utils/tutorialScenarios';
 // Import centralized logic functions
 import {
   createEmptyBoard, 
@@ -31,6 +32,14 @@ const initialState = {
   saveStatus: null, // Track save status for UI feedback
   loadStatus: null, // Track load status for UI feedback
   availableSaves: [], // List of available saves
+  
+  // Tutorial-related state
+  isTutorialMode: false,
+  tutorialStep: 0,
+  tutorialSteps: tutorialSteps,
+  tutorialHighlight: null, // { x, y, width, height, text }
+  tutorialMessage: '',
+  tutorialCompleted: false,
 };
 
 export const gameSlice = createSlice({
@@ -290,6 +299,83 @@ export const gameSlice = createSlice({
     clearSaveLoadStatus: (state) => {
       state.saveStatus = null;
       state.loadStatus = null;
+    },
+
+    // Tutorial-related reducers
+    startTutorial: (state) => {
+      // Reset game state to a tutorial-specific initial state
+      state.board = cloneBoard(tutorialBasicMovement.board);
+      
+      // Place units on the board from tutorial scenario
+      const units = tutorialBasicMovement.units || [];
+      units.forEach(unit => {
+        const { position, playerId, value, isBase } = unit;
+        if (position && position.x !== undefined && position.y !== undefined) {
+          // Create the unit on the board
+          state.board[position.y][position.x] = {
+            playerId,
+            value: isBase ? 6 : value, // Base has value 6
+            isBase: isBase || false
+          };
+        }
+      });
+      
+      state.currentPlayer = 0;
+      state.selectedPiece = null;
+      state.validMoves = [];
+      state.actions = 2; // Limited actions for tutorial
+      state.gameState = GAME_STATES.IN_PROGRESS;
+      state.isTutorialMode = true;
+      state.tutorialStep = 0;
+      state.tutorialHighlight = null;
+      state.tutorialMessage = tutorialSteps[0].instruction;
+      state.turnHistory = [{ type: 'startTutorial' }];
+    },
+
+    nextTutorialStep: (state) => {
+      if (state.tutorialStep < state.tutorialSteps.length - 1) {
+        state.tutorialStep += 1;
+        const step = state.tutorialSteps[state.tutorialStep];
+        state.tutorialMessage = step.instruction;
+        state.tutorialHighlight = null; // Clear highlight between steps
+        
+        // Log the step progression in history
+        state.turnHistory.push({ 
+          type: 'tutorialStep', 
+          step: state.tutorialStep,
+          action: step.action 
+        });
+      }
+    },
+
+    prevTutorialStep: (state) => {
+      if (state.tutorialStep > 0) {
+        state.tutorialStep -= 1;
+        const step = state.tutorialSteps[state.tutorialStep];
+        state.tutorialMessage = step.instruction;
+        state.tutorialHighlight = null; // Clear highlight between steps
+      }
+    },
+
+    setTutorialHighlight: (state, action) => {
+      state.tutorialHighlight = action.payload;
+    },
+
+    setTutorialStep: (state, action) => {
+      const stepIndex = action.payload;
+      if (stepIndex >= 0 && stepIndex < state.tutorialSteps.length) {
+        state.tutorialStep = stepIndex;
+        state.tutorialMessage = state.tutorialSteps[stepIndex].instruction;
+      }
+    },
+
+    completeTutorial: (state) => {
+      state.isTutorialMode = false;
+      state.tutorialCompleted = true;
+      state.tutorialStep = 0;
+      state.tutorialHighlight = null;
+      state.tutorialMessage = '';
+      // Return to regular game state or handle as needed
     }
   },
 });
@@ -310,7 +396,13 @@ export const {
   saveGameState,
   loadGameState,
   setAvailableSaves,
-  clearSaveLoadStatus
+  clearSaveLoadStatus,
+  startTutorial,
+  nextTutorialStep,
+  prevTutorialStep,
+  setTutorialHighlight,
+  completeTutorial,
+  setTutorialStep
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

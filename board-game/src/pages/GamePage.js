@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import GameBoard from '../components/board/GameBoard';
 import GameInfo from '../components/ui/GameInfo';
 import GameControls from '../components/ui/GameControls';
-import { initializeGame } from '../store/gameSlice';
+import TutorialOverlay from '../components/tutorial/TutorialOverlay';
+import TutorialManager from '../components/tutorial/TutorialManager';
+import { initializeGame, startTutorial, nextTutorialStep, prevTutorialStep, completeTutorial } from '../store/gameSlice';
 import useAiTurn from '../hooks/useAiTurn';
 import './GamePage.css';
 
@@ -23,9 +25,10 @@ const GamePage = () => {
   // This prevents infinite re-renders
   const initProcessedRef = useRef(false);
   
-  // Check if we came here from loading a game or starting a new game
+  // Check if we came here from loading a game, starting a new game, or from tutorial
   const fromLoad = location.state?.fromLoad === true;
   const forceNew = location.state?.forceNew === true;
+  const isTutorial = location.state?.isTutorial === true;
   
   // Initialize the game on component mount only if no game is already loaded
   useEffect(() => {
@@ -36,6 +39,13 @@ const GamePage = () => {
     
     // Mark as processed to prevent repeated initialization
     initProcessedRef.current = true;
+    
+    // If coming from the tutorial page, start tutorial mode
+    if (isTutorial) {
+      console.log('Starting tutorial mode');
+      dispatch(startTutorial());
+      return;
+    }
     
     // Don't initialize if we just loaded a game from the home screen
     if (fromLoad) {
@@ -57,16 +67,38 @@ const GamePage = () => {
     } else {
       console.log('Game already in progress, skipping initialization');
     }
-  }, [dispatch, currentGameState, gameState.board, fromLoad, forceNew]);
+  }, [dispatch, currentGameState, gameState.board, fromLoad, forceNew, isTutorial]);
   
   const handleBackToMenu = () => {
+    // If in tutorial mode, check if we should exit tutorial
+    if (gameState.isTutorialMode) {
+      if (window.confirm('Exit tutorial and return to menu?')) {
+        dispatch(completeTutorial());
+        navigate('/');
+      }
+    } else {
+      navigate('/');
+    }
+  };
+  
+  // Handle tutorial navigation
+  const handleNextTutorialStep = () => {
+    dispatch(nextTutorialStep());
+  };
+  
+  const handlePrevTutorialStep = () => {
+    dispatch(prevTutorialStep());
+  };
+  
+  const handleCompleteTutorial = () => {
+    dispatch(completeTutorial());
     navigate('/');
   };
   
   return (
     <div className="game-page">
       <div className="game-container">
-        <h1>SixDivides</h1>
+        <h1>{gameState.isTutorialMode ? 'Tutorial Mode' : 'SixDivides'}</h1>
         
         {aiThinking && (
           <div className="ai-thinking">
@@ -84,6 +116,19 @@ const GamePage = () => {
             Back to Menu
           </button>
         </div>
+        
+        {/* Render tutorial overlay when in tutorial mode */}
+        {gameState.isTutorialMode && (
+          <>
+            <TutorialOverlay 
+              currentStep={gameState.tutorialSteps[gameState.tutorialStep]}
+              onNextStep={handleNextTutorialStep}
+              onPreviousStep={gameState.tutorialStep > 0 ? handlePrevTutorialStep : null}
+              onComplete={handleCompleteTutorial}
+            />
+            <TutorialManager />
+          </>
+        )}
       </div>
     </div>
   );
