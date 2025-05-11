@@ -154,16 +154,21 @@ const TutorialManager = () => {
     
     // Only create tooltip if text is provided
     if (text) {
+      // Create a unique ID for this element if it doesn't have one already
+      const elementId = `tutorial-element-${x}-${y}`;
+      element.setAttribute('data-tutorial-id', elementId);
+      
       // Get the actual position of the element in the viewport
       const rect = element.getBoundingClientRect();
       
-      // Send the actual element position for accurate tooltip placement
+      // Send the actual element position and ID for accurate tooltip placement
       dispatch(setTutorialHighlight({
         x: rect.left,
         y: rect.top,
         width: rect.width,
         height: rect.height,
-        text: text
+        text: text,
+        elementId: elementId // This allows the TutorialOverlay to find this element
       }));
     } else {
       // Clear existing tooltip if no text is provided

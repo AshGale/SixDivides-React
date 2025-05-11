@@ -44,10 +44,18 @@
   min-width: 100px;
 }
 
-/* Board tooltip that appears directly over cells based on grid coordinates */
-.board-tooltip {
+/* Static tooltip approach - positioned at a fixed location */
+.static-tooltip-container {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
   pointer-events: none;
   animation: fadeIn 0.3s ease-in-out;
+  text-align: center;
+  width: auto;
+  max-width: 80%;
 }
 
 .tooltip-text {
@@ -57,7 +65,7 @@
   border-radius: 4px;
   font-size: 0.9rem;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal; /* Allow wrapping */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   display: inline-block;
 }
@@ -68,8 +76,7 @@
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-top: 8px solid rgba(0, 0, 0, 0.85);
-  margin: 0 auto;
-  animation: float 1s infinite alternate;
+  margin: 4px auto 0;
 }
 
 @keyframes fadeIn {

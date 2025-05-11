@@ -65,16 +65,19 @@ const TutorialOverlay = ({ currentStep, onNextStep, onPreviousStep, onComplete }
       </div>
       
       {tutorialHighlight && tutorialHighlight.text && (
-        <div className="board-tooltip" style={{
-          position: 'fixed',
-          top: `${tutorialHighlight.y - 40}px`,
-          left: `${tutorialHighlight.x + (tutorialHighlight.width / 2)}px`,
-          zIndex: 1050,
-          pointerEvents: 'none',
-          transform: 'translateX(-50%)',
-          maxWidth: '200px',
-          textAlign: 'center'
-        }}>
+        <div 
+          className="board-tooltip" 
+          style={{
+            position: 'fixed',
+            top: `${tutorialHighlight.y - 40}px`,
+            left: `${tutorialHighlight.x + (tutorialHighlight.width / 2)}px`,
+            zIndex: 1050,
+            pointerEvents: 'none',
+            transform: 'translateX(-50%)',
+            maxWidth: '200px',
+            textAlign: 'center'
+          }}
+        >
           <div className="tooltip-text">{tutorialHighlight.text}</div>
           <div className="tooltip-arrow"></div>
         </div>
