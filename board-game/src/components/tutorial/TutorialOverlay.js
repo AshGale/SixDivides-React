@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Button } from 'react-bootstrap';
 import './TutorialOverlay.css';
 
@@ -8,8 +8,7 @@ import './TutorialOverlay.css';
  * Displays instructions and highlights relevant elements
  */
 const TutorialOverlay = ({ currentStep, onNextStep, onPreviousStep, onComplete }) => {
-  const { tutorialStep, tutorialHighlight } = useSelector(state => state.game);
-  const dispatch = useDispatch();
+  const { tutorialHighlight } = useSelector(state => state.game);
 
   // Get tutorial step details from current step
   const step = currentStep || { 
@@ -65,18 +64,19 @@ const TutorialOverlay = ({ currentStep, onNextStep, onPreviousStep, onComplete }
         </div>
       </div>
       
-      {tutorialHighlight && (
-        <div 
-          className="tutorial-highlight"
-          style={{
-            left: `${tutorialHighlight.x}px`,
-            top: `${tutorialHighlight.y}px`,
-            width: `${tutorialHighlight.width}px`,
-            height: `${tutorialHighlight.height}px`
-          }}
-        >
-          <div className="highlight-pointer"></div>
-          <span className="highlight-text">{tutorialHighlight.text}</span>
+      {tutorialHighlight && tutorialHighlight.text && (
+        <div className="board-tooltip" style={{
+          position: 'fixed',
+          top: `${tutorialHighlight.y - 40}px`,
+          left: `${tutorialHighlight.x + (tutorialHighlight.width / 2)}px`,
+          zIndex: 1050,
+          pointerEvents: 'none',
+          transform: 'translateX(-50%)',
+          maxWidth: '200px',
+          textAlign: 'center'
+        }}>
+          <div className="tooltip-text">{tutorialHighlight.text}</div>
+          <div className="tooltip-arrow"></div>
         </div>
       )}
     </div>

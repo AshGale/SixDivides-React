@@ -320,7 +320,8 @@ export const gameSlice = createSlice({
         }
       });
       
-      state.currentPlayer = 0;
+      // Set the correct active player (player 1 = Blue in our tutorial)
+      state.currentPlayer = tutorialBasicMovement.activePlayerId || 1;
       state.selectedPiece = null;
       state.validMoves = [];
       state.actions = 2; // Limited actions for tutorial
