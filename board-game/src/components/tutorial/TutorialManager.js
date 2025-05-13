@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setTutorialHighlight, nextTutorialStep } from '../../store/gameSlice';
 import { highlightTutorialElement } from './tutorialHighlightUtils';
 import { isTutorialStepCompleted } from './tutorialValidationUtils';
+import { updateTutorialMoveContext } from '../../logic/moveValidation';
 
 /**
  * Component that manages tutorial interactions and highlights
@@ -49,10 +50,22 @@ const TutorialManager = () => {
       highlightTutorialElement(currentStep, board, setDispatchHighlight);
     }, 500);
     
+    // Update the move validation context with current tutorial state
+    // This ensures valid moves are shown correctly during tutorial steps
+    updateTutorialMoveContext(currentStep, tutorialSteps, isTutorialMode);
+    
     // Track if the user completed the current step action
     checkStepCompletion(currentStep);
     
   }, [tutorialStep, isTutorialMode, board, selectedPiece, tutorialSteps, units, actions, dispatch]);
+  
+  // Clear tutorial data when leaving tutorial mode
+  useEffect(() => {
+    if (!isTutorialMode) {
+      // Clear tutorial data from move validation
+      updateTutorialMoveContext(null, null, false);
+    }
+  }, [isTutorialMode]);
   
   // Helper function to pass the dispatch function to the highlight utilities
   const setDispatchHighlight = (highlightData) => {

@@ -151,60 +151,136 @@ const GameBoard = () => {
     
     if (!currentTutorialStep) return;
     
-    // Only allow specific actions based on current tutorial step
-    if (currentTutorialStep.action === 'CLICK_UNIT') {
-      // Only allow selecting the specific unit mentioned in the tutorial
-      if (piece && piece.id === currentTutorialStep.targetUnit) {
+    // Special handling for step 5 (SHOW_MOVES)
+    if (tutorialStep === 4 && currentTutorialStep.action === 'SHOW_MOVES') {
+      // Step 5 is about showing valid moves for a specific unit
+      if (piece && piece.playerId === currentPlayer) {
+        // Select the piece
         dispatch(selectPiece({ row, col, isBase: piece.isBase }));
-        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
-        dispatch(setValidMoves(moves));
+        
+        // Manually set valid moves to include the step 6 target position
+        const targetStep = tutorialSteps[5]; // Get step 6
+        if (targetStep && targetStep.targetPosition) {
+          const validMovesList = [
+            {
+              row: targetStep.targetPosition.y,
+              col: targetStep.targetPosition.x,
+              type: 'move'
+            }
+          ];
+          dispatch(setValidMoves(validMovesList));
+        } else {
+          // Fallback - use regular valid moves calculation
+          const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+          dispatch(setValidMoves(moves));
+        }
       }
-    } 
-    else if (currentTutorialStep.action === 'MOVE_TO' || currentTutorialStep.action === 'ATTACK') {
-      // If we have a selected piece and are targeting a specific position
+      return;
+    }
+    
+    // Special handling for step 6 (MOVE_TO)
+    if (tutorialStep === 5 && currentTutorialStep.action === 'MOVE_TO') {
+      // If clicking on highlighted target position while a piece is selected
       if (selectedPiece && 
           currentTutorialStep.targetPosition && 
           row === currentTutorialStep.targetPosition.y && 
           col === currentTutorialStep.targetPosition.x) {
         
-        if (currentTutorialStep.action === 'MOVE_TO' && !piece) {
-          // Execute the move action
-          dispatch(movePiece({ 
-            fromRow: selectedPiece.row, 
-            fromCol: selectedPiece.col, 
-            toRow: row, 
-            toCol: col 
-          }));
-        } 
-        else if (currentTutorialStep.action === 'ATTACK' && piece && piece.playerId !== currentPlayer) {
-          // Execute the attack action
-          dispatch(handleCombat({ 
-            attackerRow: selectedPiece.row, 
-            attackerCol: selectedPiece.col, 
-            defenderRow: row, 
-            defenderCol: col 
-          }));
-        }
-      } 
+        // Execute the move action unconditionally for tutorial
+        dispatch(movePiece({ 
+          fromRow: selectedPiece.row, 
+          fromCol: selectedPiece.col, 
+          toRow: row, 
+          toCol: col 
+        }));
+        return;
+      }
+      // Let user select any friendly piece
       else if (piece && piece.playerId === currentPlayer) {
-        // Still allow selecting pieces
         dispatch(selectPiece({ row, col, isBase: piece.isBase }));
-        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
-        dispatch(setValidMoves(moves));
-      } 
-      else {
-        dispatch(clearSelection());
+        
+        // Always show the target position as a valid move
+        if (currentTutorialStep.targetPosition) {
+          const validMovesList = [
+            {
+              row: currentTutorialStep.targetPosition.y,
+              col: currentTutorialStep.targetPosition.x,
+              type: 'move'
+            }
+          ];
+          dispatch(setValidMoves(validMovesList));
+        }
+        return;
       }
     }
-    else {
-      // Default behavior for other tutorial steps
+    
+    // Handle CLICK_UNIT action
+    if (currentTutorialStep.action === 'CLICK_UNIT') {
+      // Allow selecting the specific unit mentioned in the tutorial
       if (piece && piece.playerId === currentPlayer) {
-        dispatch(selectPiece({ row, col, isBase: piece.isBase }));
-        const moves = getValidMovesForPiece(board, row, col, currentPlayer);
-        dispatch(setValidMoves(moves));
-      } else {
-        dispatch(clearSelection());
+        // If there's a specific target unit, verify it's the correct one
+        if (currentTutorialStep.targetUnit) {
+          // Check piece ID if available, otherwise just allow selection
+          const pieceId = piece?.id;
+          if (!pieceId || pieceId === currentTutorialStep.targetUnit) {
+            dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+            const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+            dispatch(setValidMoves(moves));
+          }
+        } else {
+          // If no specific target unit, allow selecting any friendly piece
+          dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+          const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+          dispatch(setValidMoves(moves));
+        }
       }
+      return;
+    }
+    
+    // Handle ATTACK action 
+    if (currentTutorialStep.action === 'ATTACK') {
+      // If clicking on highlighted target position while a piece is selected
+      if (selectedPiece && 
+          currentTutorialStep.targetPosition && 
+          row === currentTutorialStep.targetPosition.y && 
+          col === currentTutorialStep.targetPosition.x &&
+          piece && piece.playerId !== currentPlayer) {
+        
+        // Execute the attack action
+        dispatch(handleCombat({ 
+          attackerRow: selectedPiece.row, 
+          attackerCol: selectedPiece.col, 
+          defenderRow: row, 
+          defenderCol: col 
+        }));
+        return;
+      }
+      // Let user select any friendly piece
+      else if (piece && piece.playerId === currentPlayer) {
+        dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+        
+        // Always show the target position as a valid attack
+        if (currentTutorialStep.targetPosition) {
+          const validMovesList = [
+            {
+              row: currentTutorialStep.targetPosition.y,
+              col: currentTutorialStep.targetPosition.x,
+              type: 'attack'
+            }
+          ];
+          dispatch(setValidMoves(validMovesList));
+        }
+        return;
+      }
+    }
+    
+    // Default behavior for other tutorial steps
+    if (piece && piece.playerId === currentPlayer) {
+      dispatch(selectPiece({ row, col, isBase: piece.isBase }));
+      const moves = getValidMovesForPiece(board, row, col, currentPlayer);
+      dispatch(setValidMoves(moves));
+    } else {
+      dispatch(clearSelection());
     }
   };
   
