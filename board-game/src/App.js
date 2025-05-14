@@ -5,6 +5,7 @@ import store from './store';
 import HomePage from './pages/HomePage';
 import NewGamePage from './pages/NewGamePage';
 import GamePage from './pages/GamePage';
+import TutorialPage from './pages/TutorialPage';
 import HowToPlayPage from './pages/HowToPlayPage';
 import MapEditorPage from './pages/MapEditorPage';
 import ScenariosPage from './pages/ScenariosPage';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/new-game" element={<NewGamePage />} />
             <Route path="/game" element={<GamePage />} />
+            <Route path="/tutorial" element={<TutorialPage />} />
             <Route path="/how-to-play" element={<HowToPlayPage />} />
             <Route path="/map-editor" element={<MapEditorPage />} />
             <Route path="/scenarios" element={<ScenariosPage />} />

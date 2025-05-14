@@ -2,9 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import GameBoard from '../components/board/GameBoard';
+import TutorialGameBoard from '../components/tutorial/TutorialGameBoard';
+import TutorialManager from '../components/tutorial/TutorialManager';
 import GameInfo from '../components/ui/GameInfo';
 import GameControls from '../components/ui/GameControls';
 import { initializeGame } from '../store/gameSlice';
+import { exitTutorial } from '../store/tutorialSlice';
 import useAiTurn from '../hooks/useAiTurn';
 import './GamePage.css';
 
@@ -23,9 +26,11 @@ const GamePage = () => {
   // This prevents infinite re-renders
   const initProcessedRef = useRef(false);
   
-  // Check if we came here from loading a game or starting a new game
+  // Check if we came here from loading a game, starting a new game, or from tutorial
   const fromLoad = location.state?.fromLoad === true;
   const forceNew = location.state?.forceNew === true;
+  const isTutorial = location.state?.isTutorial === true;
+  const tutorialLessonId = location.state?.lessonId;
   
   // Initialize the game on component mount only if no game is already loaded
   useEffect(() => {
@@ -60,28 +65,36 @@ const GamePage = () => {
   }, [dispatch, currentGameState, gameState.board, fromLoad, forceNew]);
   
   const handleBackToMenu = () => {
+    // If we're in tutorial mode, clean up tutorial state before going back
+    if (isTutorial) {
+      dispatch(exitTutorial());
+    }
     navigate('/');
   };
   
   return (
     <div className="game-page">
       <div className="game-container">
-        <h1>SixDivides</h1>
+        <h1>{isTutorial ? 'SixDivides Tutorial' : 'SixDivides'}</h1>
         
-        {aiThinking && (
+        {aiThinking && !isTutorial && (
           <div className="ai-thinking">
             AI is thinking...
           </div>
         )}
         
+        {/* Show tutorial-related components if in tutorial mode */}
+        {isTutorial && <TutorialManager />}
+        
         <GameInfo />
         
-        <GameBoard />
+        {/* Use the appropriate board component based on mode */}
+        {isTutorial ? <TutorialGameBoard /> : <GameBoard />}
         
         <div className="game-actions">
-          <GameControls />
+          {!isTutorial && <GameControls />}
           <button className="menu-button" onClick={handleBackToMenu}>
-            Back to Menu
+            {isTutorial ? 'Exit Tutorial' : 'Back to Menu'}
           </button>
         </div>
       </div>

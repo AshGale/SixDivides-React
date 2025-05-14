@@ -42,6 +42,10 @@ const HomePage = () => {
         </p>
         
         <div className="home-buttons vertical-buttons">
+          <Link to="/tutorial" className="home-button tutorial-button">
+            Tutorial
+          </Link>
+
           <Link to="/new-game" className="home-button primary-button">
             New Game
           </Link>

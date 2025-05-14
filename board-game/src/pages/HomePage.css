@@ -122,3 +122,34 @@
 .scenario-button:hover {
   background-color: #673ab7;
 }
+
+.tutorial-button {
+  background-color: #ff5722;
+  color: white;
+  box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+  font-size: 1.3rem;
+  /* Make it slightly larger than other buttons */
+  padding: 18px 30px;
+  position: relative;
+  overflow: hidden;
+  /* Add a subtle pulsing animation */
+  animation: tutorialButtonPulse 2s infinite ease-in-out;
+}
+
+.tutorial-button:hover {
+  background-color: #e64a19;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(255, 87, 34, 0.5);
+}
+
+@keyframes tutorialButtonPulse {
+  0% {
+    box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 18px rgba(255, 87, 34, 0.6);
+  }
+  100% {
+    box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+  }
+}
