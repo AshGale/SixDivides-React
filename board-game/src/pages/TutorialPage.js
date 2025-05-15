@@ -13,13 +13,15 @@ const TutorialPage = () => {
   const dispatch = useDispatch();
 
   const handleStartLesson = (lessonId) => {
+    console.log('Starting tutorial lesson:', lessonId);
     // Initialize the tutorial state with the selected lesson
     dispatch(initializeTutorial(lessonId));
     // Navigate to the gameplay page with a special state to indicate tutorial mode
     navigate('/game', { 
       state: { 
         isTutorial: true,
-        lessonId: lessonId
+        lessonId: lessonId,
+        hideDistractingButtons: true // Flag to hide distracting buttons like New Game
       } 
     });
   };

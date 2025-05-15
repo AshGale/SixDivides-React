@@ -44,7 +44,13 @@ const TutorialGameBoard = () => {
     
     // If the tutorial step has restrictions, enforce them
     const restrictions = currentTutorialStep?.restriction || null;
-    const piece = board[row][col];
+    
+    // Log for debugging
+    console.log('Clicked cell:', row, col);
+    console.log('Current tutorial step:', currentTutorialStep);
+    console.log('Board:', board);
+    
+    const piece = board?.[row]?.[col];
     
     // If clicking a valid move location
     if (selectedPiece && validMoves.some(move => move.row === row && move.col === col)) {

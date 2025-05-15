@@ -8,6 +8,7 @@ import GameInfo from '../components/ui/GameInfo';
 import GameControls from '../components/ui/GameControls';
 import { initializeGame } from '../store/gameSlice';
 import { exitTutorial } from '../store/tutorialSlice';
+import { setDisabledForTutorial } from '../store/aiSlice';
 import useAiTurn from '../hooks/useAiTurn';
 import './GamePage.css';
 
@@ -20,7 +21,6 @@ const GamePage = () => {
   const dispatch = useDispatch();
   const gameState = useSelector(state => state.game);
   const { gameState: currentGameState } = gameState;
-  const { aiThinking } = useAiTurn();
   
   // Use a ref to track if we've already processed initialization
   // This prevents infinite re-renders
@@ -31,6 +31,26 @@ const GamePage = () => {
   const forceNew = location.state?.forceNew === true;
   const isTutorial = location.state?.isTutorial === true;
   const tutorialLessonId = location.state?.lessonId;
+  const hideDistractingButtons = location.state?.hideDistractingButtons === true;
+  
+  // Only use AI turn hook when NOT in tutorial mode
+  const { aiThinking } = isTutorial ? { aiThinking: false } : useAiTurn();
+  
+  // Disable AI when in tutorial mode
+  useEffect(() => {
+    if (isTutorial) {
+      console.log('Tutorial mode active - disabling AI');
+      dispatch(setDisabledForTutorial(true));
+    } else {
+      // Re-enable AI when not in tutorial mode
+      dispatch(setDisabledForTutorial(false));
+    }
+    
+    // Clean up when component unmounts
+    return () => {
+      dispatch(setDisabledForTutorial(false));
+    };
+  }, [dispatch, isTutorial]);
   
   // Initialize the game on component mount only if no game is already loaded
   useEffect(() => {
@@ -92,8 +112,11 @@ const GamePage = () => {
         {isTutorial ? <TutorialGameBoard /> : <GameBoard />}
         
         <div className="game-actions">
-          {!isTutorial && <GameControls />}
-          <button className="menu-button" onClick={handleBackToMenu}>
+          {/* Only show game controls in regular mode, not tutorial mode */}
+          {!isTutorial && !hideDistractingButtons && <GameControls />}
+          
+          {/* Always show exit/back button */}
+          <button className="menu-button tutorial-exit-button" onClick={handleBackToMenu}>
             {isTutorial ? 'Exit Tutorial' : 'Back to Menu'}
           </button>
         </div>

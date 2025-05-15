@@ -35,7 +35,13 @@ export const makeAiMove = createAsyncThunk(
   async (_, { getState, dispatch }) => {
     const state = getState();
     const { board, currentPlayer, actions } = state.game;
-    const { aiPlayers, aiDelay } = state.ai;
+    const { aiPlayers, aiDelay, disabledForTutorial } = state.ai;
+    
+    // Check if AI is disabled for tutorial
+    if (disabledForTutorial) {
+      console.log('AI moves disabled for tutorial');
+      return null;
+    }
     
     // Check if current player is AI
     if (!aiPlayers[currentPlayer] || actions <= 0) {
@@ -106,6 +112,7 @@ const initialState = {
   aiDelay: 800, // Delay in ms before AI makes a move
   aiThinking: false, // Whether AI is currently "thinking"
   lastAiMove: null, // Last move made by AI
+  disabledForTutorial: false, // Whether AI is disabled for tutorial mode
 };
 
 export const aiSlice = createSlice({
@@ -118,6 +125,9 @@ export const aiSlice = createSlice({
     },
     setAiDelay: (state, action) => {
       state.aiDelay = action.payload;
+    },
+    setDisabledForTutorial: (state, action) => {
+      state.disabledForTutorial = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -135,6 +145,6 @@ export const aiSlice = createSlice({
   },
 });
 
-export const { setPlayerType, setAiDelay } = aiSlice.actions;
+export const { setPlayerType, setAiDelay, setDisabledForTutorial } = aiSlice.actions;
 
 export default aiSlice.reducer;

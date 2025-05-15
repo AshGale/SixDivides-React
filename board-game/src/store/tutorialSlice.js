@@ -71,13 +71,16 @@ export const initializeTutorial = (scenarioId) => (dispatch) => {
     gameState: 'IN_PROGRESS',
     showTurnMessage: false,
     winner: null,
+    numPlayers: 2, // Set number of players for tutorial
+    turnHistory: [] // Initialize with empty turn history
   };
   
-  // Load the tutorial game state
-  dispatch(loadGameState(tutorialGameState));
-  
-  // Start the tutorial with the scenario ID
+  // First activate the tutorial scenario
   dispatch(startTutorial(scenarioId));
+  
+  // Then load the tutorial game state
+  // We do this second to ensure the tutorial state is ready
+  dispatch(loadGameState(tutorialGameState));
 };
 
 export const { 
