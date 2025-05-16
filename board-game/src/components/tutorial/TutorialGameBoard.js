@@ -7,7 +7,6 @@ import {
   clearSelection,
   movePiece,
   combineUnits,
-  handleCombat,
   handleBaseAction
 } from '../../store/gameSlice';
 import { advanceTutorial } from '../../store/tutorialSlice';
@@ -47,122 +46,86 @@ const TutorialGameBoard = () => {
     
     // Log for debugging
     console.log('Clicked cell:', row, col);
-    console.log('Current tutorial step:', currentTutorialStep);
-    console.log('Board:', board);
     
-    const piece = board?.[row]?.[col];
-    
-    // If clicking a valid move location
-    if (selectedPiece && validMoves.some(move => move.row === row && move.col === col)) {
-      const selectedUnit = board[selectedPiece.row][selectedPiece.col];
-      
-      // Safety check - selected unit must exist
-      if (!selectedUnit) {
-        dispatch(clearSelection());
-        return;
+    // If no piece is selected, try to select one
+    if (!selectedPiece) {
+      // Check if this cell has a piece that can be selected
+      const piece = board[row][col];
+      if (piece && piece.playerId === currentPlayer) {
+        const moves = getTutorialValidMoves(board, row, col, currentPlayer, restrictions);
+        if (moves.length > 0) {
+          dispatch(selectPiece({ row, col, isBase: piece.value === 6 }));
+          dispatch(setValidMoves(moves));
+          
+          // If the tutorial step requires selecting a specific piece, check if this is it
+          const isTargetPiece = currentTutorialStep?.restriction?.type === 'forcedSelection' &&
+                              row === currentTutorialStep.restriction.row &&
+                              col === currentTutorialStep.restriction.col;
+          
+          if (currentTutorialStep?.waitForAction && isTargetPiece && 
+              (!currentTutorialStep.nextTrigger || currentTutorialStep.nextTrigger === 'pieceSelected')) {
+            // Add a small delay before advancing to the next step
+            setTimeout(() => {
+              dispatch(advanceTutorial());
+            }, 500); // Shorter delay for selection
+          }
+        }
       }
-
-      // Find the move type
-      const move = validMoves.find(m => m.row === row && m.col === col);
-      const moveType = move?.type;
-
-      if (selectedPiece.isBase) {
-        dispatch(handleBaseAction({ 
-          baseRow: selectedPiece.row, 
-          baseCol: selectedPiece.col, 
-          targetRow: row, 
-          targetCol: col, 
-          actionType: moveType 
-        }));
-        
-        // Advance tutorial if this was a required action
-        if (currentTutorialStep?.waitForAction && currentTutorialStep?.nextTrigger === 'baseAction') {
-          dispatch(advanceTutorial());
-        }
-        return;
-      }
-
-      const targetPiece = board[row][col];
-
-      if (!targetPiece && moveType === 'move') {
-        // Move to empty cell
-        dispatch(movePiece({ 
-          fromRow: selectedPiece.row, 
-          fromCol: selectedPiece.col, 
-          toRow: row, 
-          toCol: col 
-        }));
-        
-        // Advance tutorial if this was a required action
-        if (currentTutorialStep?.waitForAction && currentTutorialStep?.nextTrigger === 'pieceMoved') {
-          dispatch(advanceTutorial());
-        }
-      } else if (targetPiece && targetPiece.playerId === currentPlayer && moveType === 'combine') {
-        // Combine friendly units
-        dispatch(combineUnits({ 
-          fromRow: selectedPiece.row, 
-          fromCol: selectedPiece.col, 
-          toRow: row, 
-          toCol: col 
-        }));
-        
-        // Advance tutorial if this was a required action
-        if (currentTutorialStep?.waitForAction && currentTutorialStep?.nextTrigger === 'unitsCombined') {
-          dispatch(advanceTutorial());
-        }
-      } else if (targetPiece && targetPiece.playerId !== currentPlayer && moveType === 'attack') {
-        // Combat with enemy unit
-        dispatch(handleCombat({ 
-          attackerRow: selectedPiece.row, 
-          attackerCol: selectedPiece.col, 
-          defenderRow: row, 
-          defenderCol: col 
-        }));
-        
-        // Advance tutorial if this was a required action
-        if (currentTutorialStep?.waitForAction && currentTutorialStep?.nextTrigger === 'combat') {
-          dispatch(advanceTutorial());
-        }
-      } else {
-        // Invalid action - don't consume an action
-        dispatch(clearSelection());
-        return;
-      }
-      
       return;
     }
 
-    // If selecting a new piece
-    if (piece && piece.playerId === currentPlayer) {
-      const isBase = piece.value === 6;
-      
-      // If forced selection is active, only allow selection of the forced piece
-      if (restrictions && restrictions.type === 'forcedSelection') {
-        if (row !== restrictions.row || col !== restrictions.col) {
-          return; // Prevent selecting any other piece
+    // If we have a selected piece
+    const isMoveValid = validMoves.some(move => move.row === row && move.col === col);
+    
+    // Check if this is an invalid move that we want to prevent
+    const isInvalidMove = !isMoveValid && currentTutorialStep?.preventInvalidMoves;
+    
+    if (isMoveValid || isInvalidMove) {
+      // If this is a valid move, handle it
+      if (isMoveValid) {
+        const move = validMoves.find(m => m.row === row && m.col === col);
+        
+        if (move.type === 'move' || move.type === 'attack') {
+          dispatch(movePiece({ 
+            fromRow: selectedPiece.row, 
+            fromCol: selectedPiece.col, 
+            toRow: row, 
+            toCol: col,
+            type: move.type
+          }));
+        } else if (move.type === 'combine') {
+          dispatch(combineUnits({ 
+            fromRow: selectedPiece.row, 
+            fromCol: selectedPiece.col, 
+            toRow: row, 
+            toCol: col 
+          }));
+        } else if (move.type === 'baseAction') {
+          dispatch(handleBaseAction({ 
+            baseRow: selectedPiece.row, 
+            baseCol: selectedPiece.col, 
+            targetRow: row, 
+            targetCol: col 
+          }));
         }
       }
       
-      dispatch(selectPiece({ row, col, isBase }));
-      
-      // Calculate valid moves with tutorial restrictions
-      const moves = getTutorialValidMoves(
-        board, 
-        row, 
-        col, 
-        currentPlayer, 
-        restrictions
-      );
-      
-      dispatch(setValidMoves(moves));
-      
-      // Advance tutorial if this was a required action
-      if (currentTutorialStep?.waitForAction && currentTutorialStep?.nextTrigger === 'pieceSelected') {
-        dispatch(advanceTutorial());
-      }
-    } else {
+      // Clear selection after move or invalid attempt
       dispatch(clearSelection());
+      
+      // If this was a tutorial step that requires a specific action, advance the tutorial
+      if (currentTutorialStep?.waitForAction && 
+          (!currentTutorialStep.nextTrigger || currentTutorialStep.nextTrigger === 'pieceMoved')) {
+        // Add a small delay before advancing to the next step
+        setTimeout(() => {
+          dispatch(advanceTutorial());
+        }, 1000); // 1 second delay
+      }
+      return;
     }
+    
+    // If we get here, it's an invalid move or selection
+    dispatch(clearSelection());
   };
 
   // Get cell class names with tutorial highlights

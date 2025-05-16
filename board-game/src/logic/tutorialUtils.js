@@ -86,14 +86,20 @@ export const getBasicMovesTutorial = () => {
   // Create a clean 8x8 board
   const board = Array(8).fill().map(() => Array(8).fill(null));
   
-  // Place player 1 base
+  // Place player 1 base in its original position
   board[7][0] = { playerId: 1, value: 6 };
   
   // Place a pawn for player 1
   board[6][1] = { playerId: 1, value: 1 };
   
-  // Place player 2 base
-  board[0][7] = { playerId: 2, value: 6 };
+  // Place a second player 1 base to demonstrate friendly base restrictions
+  board[5][0] = { playerId: 1, value: 6 };
+  
+  // Place player 2 base to demonstrate enemy base restrictions
+  board[5][2] = { playerId: 2, value: 6 };
+  
+  // Place a second pawn for player 1 to demonstrate combining
+  board[4][1] = { playerId: 1, value: 1 };
   
   // Place some units for player 2
   board[1][6] = { playerId: 2, value: 1 };
@@ -101,13 +107,25 @@ export const getBasicMovesTutorial = () => {
   // Tutorial steps
   const steps = [
     {
-      instruction: "Welcome to the tutorial! Let's learn how to play SixDivides.",
+      instruction: "Welcome to SixDivides! This is a strategic board game where you control dice-based units. The game is played on an 8x8 board, just like chess.",
       highlightedCells: [],
       restriction: null,
       waitForAction: false
     },
     {
-      instruction: "First, let's select one of your units. Click on the pawn (value 1) highlighted below.",
+      instruction: "The game is turn-based. Each turn, you can take actions like moving or attacking. The number of actions you can take is shown at the top of the screen.",
+      highlightedCells: [],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "Let's start with the basics. You control the white pieces at the bottom of the board. Each piece has a value that determines its strength in combat.",
+      highlightedCells: [{ row: 7, col: 0 }, { row: 6, col: 1 }],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "Click on your pawn (value 1) to select it. This is how you'll interact with your units.",
       highlightedCells: [{ row: 6, col: 1 }],
       restriction: {
         type: 'forcedSelection',
@@ -118,7 +136,7 @@ export const getBasicMovesTutorial = () => {
       nextTrigger: 'pieceSelected'
     },
     {
-      instruction: "Great! Notice how the valid moves are highlighted. Let's move the pawn up one space.",
+      instruction: "Great! The highlighted squares show where you can move. Click on the highlighted square above your pawn to move there.",
       highlightedCells: [{ row: 5, col: 1 }],
       restriction: {
         type: 'restrictedMoves',
@@ -128,7 +146,63 @@ export const getBasicMovesTutorial = () => {
       nextTrigger: 'pieceMoved'
     },
     {
-      instruction: "Perfect! You've learned how to move a piece. Let's try another action in the next lesson.",
+      instruction: "Now, let's learn about movement restrictions. Notice the two base units (value 6) around your pawn - one friendly and one enemy. Your pawn (value 1) can't move onto or combine with any bases.",
+      highlightedCells: [{ row: 5, col: 0 }, { row: 5, col: 2 }],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "Try selecting your pawn again and see what moves are available. You can't move onto the friendly base or attack the enemy base that has a higher value.",
+      highlightedCells: [{ row: 5, col: 1 }],
+      restriction: {
+        type: 'forcedSelection',
+        row: 5,
+        col: 1
+      },
+      waitForAction: true,
+      nextTrigger: 'pieceSelected'
+    },
+    {
+      instruction: "Notice how you can't attack the enemy base (value 6) with a pawn (value 1), and you can't move onto or combine with friendly bases either. You can only attack enemy units with equal or lower value.",
+      highlightedCells: [{ row: 5, col: 0 }, { row: 5, col: 2 }],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "Now let's learn about combining units! Did you notice there's another pawn (value 1) below? You can combine two identical units to create a stronger unit.",
+      highlightedCells: [{ row: 4, col: 1 }],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "Select your pawn at position (5,1) to combine it with the other pawn.",
+      highlightedCells: [{ row: 5, col: 1 }],
+      restriction: {
+        type: 'forcedSelection',
+        row: 5,
+        col: 1
+      },
+      waitForAction: true,
+      nextTrigger: 'pieceSelected'
+    },
+    {
+      instruction: "Great! Now move onto the other pawn to combine them into a stronger unit (value 2).",
+      highlightedCells: [{ row: 4, col: 1 }],
+      restriction: {
+        type: 'restrictedMoves',
+        allowedMoves: [{ row: 4, col: 1, type: 'combine' }]
+      },
+      waitForAction: true,
+      nextTrigger: 'pieceMoved'
+    },
+    {
+      instruction: "Perfect! You've created a value 2 unit by combining two value 1 units. You can continue combining units of the same value to create stronger units, up to value 5.",
+      highlightedCells: [{ row: 4, col: 1 }],
+      restriction: null,
+      waitForAction: false
+    },
+    {
+      instruction: "You've completed the basics tutorial! You've learned how to move units, understand movement restrictions, and combine units. Check out the 'How to Play' section for more details on game rules.",
       highlightedCells: [],
       restriction: null,
       waitForAction: false
