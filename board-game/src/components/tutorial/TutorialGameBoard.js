@@ -7,7 +7,8 @@ import {
   clearSelection,
   movePiece,
   combineUnits,
-  handleBaseAction
+  handleBaseAction,
+  loadGameState
 } from '../../store/gameSlice';
 import { advanceTutorial } from '../../store/tutorialSlice';
 import { getTutorialValidMoves } from '../../logic/tutorialUtils';
@@ -36,6 +37,56 @@ const TutorialGameBoard = () => {
 
   // Get current tutorial step
   const currentTutorialStep = tutorialScenario?.steps[currentStep] || null;
+  
+  // Keep track of the last processed tutorial step to prevent infinite loops
+  const lastProcessedStepRef = React.useRef(-1);
+  
+  // Handle board modifications when tutorial steps change
+  React.useEffect(() => {
+    // Only process each step once to prevent infinite loops
+    if (currentTutorialStep?.boardModification && currentStep !== lastProcessedStepRef.current) {
+      // Update the ref to mark this step as processed
+      lastProcessedStepRef.current = currentStep;
+      
+      const { add, remove } = currentTutorialStep.boardModification;
+      
+      // Make a deep copy of the current board
+      const newBoard = JSON.parse(JSON.stringify(board));
+      
+      // Add new pieces to the board
+      if (add && add.length > 0) {
+        add.forEach(piece => {
+          newBoard[piece.row][piece.col] = { 
+            playerId: piece.playerId, 
+            value: piece.value 
+          };
+        });
+      }
+      
+      // Remove pieces from the board
+      if (remove && remove.length > 0) {
+        remove.forEach(position => {
+          newBoard[position.row][position.col] = null;
+        });
+      }
+      
+      // Create a modified state that keeps the current game state but updates the board
+      const modifiedState = {
+        ...{
+          currentPlayer, 
+          board: newBoard, 
+          selectedPiece, 
+          validMoves, 
+          actions,
+          winner
+        },
+        gameState: 'IN_PROGRESS'
+      };
+      
+      // Update the board by loading the modified state
+      dispatch(loadGameState(modifiedState));
+    }
+  }, [currentStep, currentTutorialStep, board, dispatch, currentPlayer, selectedPiece, validMoves, actions, winner]);
   
   // Handle cell click with tutorial restrictions
   const handleCellClick = (row, col) => {
