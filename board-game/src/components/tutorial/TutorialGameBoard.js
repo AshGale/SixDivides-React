@@ -92,6 +92,11 @@ const TutorialGameBoard = () => {
   const handleCellClick = (row, col) => {
     if (winner || actions <= 0) return;
     
+    // If the tutorial step prevents all moves, block interaction completely
+    if (currentTutorialStep?.preventAllMoves) {
+      return;
+    }
+    
     // If the tutorial step has restrictions, enforce them
     const restrictions = currentTutorialStep?.restriction || null;
     
@@ -128,6 +133,11 @@ const TutorialGameBoard = () => {
     // If we have a selected piece
     const isMoveValid = validMoves.some(move => move.row === row && move.col === col);
     
+    // For debugging
+    console.log('Valid moves:', validMoves);
+    console.log('Clicked on:', row, col);
+    console.log('Is move valid:', isMoveValid);
+    
     // Check if this is an invalid move that we want to prevent
     const isInvalidMove = !isMoveValid && currentTutorialStep?.preventInvalidMoves;
     
@@ -135,6 +145,8 @@ const TutorialGameBoard = () => {
       // If this is a valid move, handle it
       if (isMoveValid) {
         const move = validMoves.find(m => m.row === row && m.col === col);
+        
+        console.log('Found move type:', move.type);
         
         if (move.type === 'move' || move.type === 'attack') {
           dispatch(movePiece({ 
@@ -144,13 +156,16 @@ const TutorialGameBoard = () => {
             toCol: col,
             type: move.type
           }));
+          console.log('Dispatched movePiece action');
         } else if (move.type === 'combine') {
+          console.log('Attempting to combine units at:', selectedPiece.row, selectedPiece.col, 'and', row, col);
           dispatch(combineUnits({ 
             fromRow: selectedPiece.row, 
             fromCol: selectedPiece.col, 
             toRow: row, 
             toCol: col 
           }));
+          console.log('Dispatched combineUnits action');
         } else if (move.type === 'baseAction') {
           dispatch(handleBaseAction({ 
             baseRow: selectedPiece.row, 
@@ -181,7 +196,10 @@ const TutorialGameBoard = () => {
 
   // Get cell class names with tutorial highlights
   const getCellClassesWithTutorial = (row, col) => {
-    const baseClasses = getCellClasses(row, col, validMoves, selectedPiece, board, currentPlayer);
+    // If all moves are prevented, don't show valid moves
+    const hasValidMoves = currentTutorialStep?.preventAllMoves ? [] : validMoves;
+    
+    const baseClasses = getCellClasses(row, col, hasValidMoves, selectedPiece, board, currentPlayer);
     const isTutorialHighlighted = currentTutorialStep?.highlightedCells?.some(
       cell => cell.row === row && cell.col === col
     );

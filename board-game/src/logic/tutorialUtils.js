@@ -106,7 +106,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "The game is turn-based. Each turn, you can take actions like moving or attacking. The number of actions you can take is shown at the top of the screen.",
@@ -114,7 +115,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "Let's start with the basics. You control the white pieces at the bottom of the board. Each piece has a value that determines its strength in combat.",
@@ -122,7 +124,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "Click on your pawn (value 1) to select it. This is how you'll interact with your units.",
@@ -165,7 +168,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "Select your pawn to see what moves are available. Notice how you can't move onto the friendly base or attack the enemy base with your pawn.",
@@ -184,7 +188,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "Now let's learn about combining units! Let's add another pawn in front of your current pawn.",
@@ -193,6 +198,7 @@ export const getBasicMovesTutorial = () => {
         type: 'disableInteraction'
       },
       waitForAction: false,
+      preventAllMoves: true,
       boardModification: {
         add: [
           { row: 4, col: 1, playerId: 1, value: 1 }   // Add second pawn for combining (one row above current pawn)
@@ -205,7 +211,8 @@ export const getBasicMovesTutorial = () => {
       restriction: {
         type: 'disableInteraction'
       },
-      waitForAction: false
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "Select your pawn (at position 5,1) to combine it with the other pawn.",
@@ -222,7 +229,9 @@ export const getBasicMovesTutorial = () => {
       instruction: "Great! Now move onto the other pawn (position 4,1) to combine them into a stronger unit (value 2).",
       highlightedCells: [{ row: 4, col: 1 }],
       restriction: {
-        type: 'restrictedMoves',
+        type: 'forcedSelection',
+        row: 5,
+        col: 1,
         allowedMoves: [{ row: 4, col: 1, type: 'combine' }]
       },
       waitForAction: true,
@@ -231,14 +240,20 @@ export const getBasicMovesTutorial = () => {
     {
       instruction: "Perfect! You've created a value 2 unit by combining two value 1 units. You can continue combining units of the same value to create stronger units, up to value 5.",
       highlightedCells: [{ row: 4, col: 1 }],
-      restriction: null,
-      waitForAction: false
+      restriction: {
+        type: 'disableInteraction'
+      },
+      waitForAction: false,
+      preventAllMoves: true
     },
     {
       instruction: "You've completed the basics tutorial! You've learned how to move units, understand movement restrictions, and combine units. Check out the 'How to Play' section for more details on game rules.",
       highlightedCells: [],
-      restriction: null,
-      waitForAction: false
+      restriction: {
+        type: 'disableInteraction'
+      },
+      waitForAction: false,
+      preventAllMoves: true
     }
   ];
   

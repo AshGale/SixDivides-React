@@ -20,11 +20,12 @@ const TutorialManager = () => {
   const tutorialLessonId = location.state?.lessonId;
   
   // Check if we're in a tutorial context
-  if (!tutorialScenario && !tutorialLessonId) {
+  if (!tutorialScenario) {
     return null;
   }
 
-  const currentTutorialStep = tutorialScenario.steps[currentStep];
+  // Safely access the current tutorial step
+  const currentTutorialStep = tutorialScenario?.steps?.[currentStep];
 
   const handleNextStep = () => {
     dispatch(advanceTutorial());
@@ -46,11 +47,11 @@ const TutorialManager = () => {
       ) : (
         <div className="tutorial-instruction-container">
           <div className="tutorial-instruction">
-            {currentTutorialStep.instruction}
+            {currentTutorialStep?.instruction || 'Loading tutorial...'}
           </div>
           
           {/* Only show the Next button if we're not waiting for a specific action */}
-          {!currentTutorialStep.waitForAction && (
+          {currentTutorialStep && !currentTutorialStep.waitForAction && (
             <button 
               className="tutorial-next-button"
               onClick={handleNextStep}
